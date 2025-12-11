@@ -9,9 +9,13 @@ import SwiftUI
 
 @main
 struct PaperScopeApp: App {
+    @StateObject private var appSettings = AppSettings()
+    
     var body: some Scene {
         WindowGroup {
             RootTabView()
+                .environmentObject(appSettings)
+                .preferredColorScheme(appSettings.isDarkMode ? .dark : .light)
         }
     }
 }

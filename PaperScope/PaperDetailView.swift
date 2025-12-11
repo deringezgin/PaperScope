@@ -11,7 +11,7 @@ struct PaperDetailView: View {
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
 
-                Text(paper.authors)
+                Text(paper.authorsDisplay)
                     .font(.headline)
                     .foregroundColor(.secondary)
 

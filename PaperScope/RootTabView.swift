@@ -14,9 +14,19 @@ struct RootTabView: View {
     
     var body: some View {
         TabView {
-            PapersView()
+            RecentView()
                 .tabItem {
-                    Label("Papers", systemImage: "doc.text.image")
+                    Label("Recent", systemImage: "house")
+                }
+            
+            ListsView()
+                .tabItem {
+                    Label("Lists", systemImage: "list.bullet.rectangle")
+                }
+            
+            SearchView()
+                .tabItem {
+                    Label("Search", systemImage: "magnifyingglass")
                 }
             
             SettingsView()

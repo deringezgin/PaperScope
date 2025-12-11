@@ -10,7 +10,7 @@ struct PaperCardView: View {
                 .foregroundColor(.primary)
                 .lineLimit(2)
 
-            Text(paper.authors)
+            Text(paper.authorsDisplay)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .lineLimit(1)

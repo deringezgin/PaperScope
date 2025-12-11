@@ -1,0 +1,156 @@
+main_id,main_name,sub_id,sub_name,sub_code
+astro-ph,Astrophysics,astro-ph.CO,Cosmology and Nongalactic Astrophysics,astro-ph.CO
+astro-ph,Astrophysics,astro-ph.EP,Earth and Planetary Astrophysics,astro-ph.EP
+astro-ph,Astrophysics,astro-ph.GA,Astrophysics of Galaxies,astro-ph.GA
+astro-ph,Astrophysics,astro-ph.HE,High Energy Astrophysical Phenomena,astro-ph.HE
+astro-ph,Astrophysics,astro-ph.IM,Instrumentation and Methods for Astrophysics,astro-ph.IM
+astro-ph,Astrophysics,astro-ph.SR,Solar and Stellar Astrophysics,astro-ph.SR
+cs,Computer Science,cs.AI,Artificial Intelligence,cs.AI
+cs,Computer Science,cs.AR,Hardware Architecture,cs.AR
+cs,Computer Science,cs.CC,Computational Complexity,cs.CC
+cs,Computer Science,cs.CE,"Computational Engineering, Finance, and Science",cs.CE
+cs,Computer Science,cs.CG,Computational Geometry,cs.CG
+cs,Computer Science,cs.CL,Computation and Language,cs.CL
+cs,Computer Science,cs.CR,Cryptography and Security,cs.CR
+cs,Computer Science,cs.CV,Computer Vision and Pattern Recognition,cs.CV
+cs,Computer Science,cs.CY,Computers and Society,cs.CY
+cs,Computer Science,cs.DB,Databases,cs.DB
+cs,Computer Science,cs.DC,"Distributed, Parallel, and Cluster Computing",cs.DC
+cs,Computer Science,cs.DL,Digital Libraries,cs.DL
+cs,Computer Science,cs.DM,Discrete Mathematics,cs.DM
+cs,Computer Science,cs.DS,Data Structures and Algorithms,cs.DS
+cs,Computer Science,cs.ET,Emerging Technologies,cs.ET
+cs,Computer Science,cs.FL,Formal Languages and Automata Theory,cs.FL
+cs,Computer Science,cs.GL,General Literature,cs.GL
+cs,Computer Science,cs.GR,Graphics,cs.GR
+cs,Computer Science,cs.GT,Computer Science and Game Theory,cs.GT
+cs,Computer Science,cs.HC,Human-Computer Interaction,cs.HC
+cs,Computer Science,cs.IR,Information Retrieval,cs.IR
+cs,Computer Science,cs.IT,Information Theory,cs.IT
+cs,Computer Science,cs.LG,Machine Learning,cs.LG
+cs,Computer Science,cs.LO,Logic in Computer Science,cs.LO
+cs,Computer Science,cs.MA,Multiagent Systems,cs.MA
+cs,Computer Science,cs.MM,Multimedia,cs.MM
+cs,Computer Science,cs.MS,Mathematical Software,cs.MS
+cs,Computer Science,cs.NA,Numerical Analysis,cs.NA
+cs,Computer Science,cs.NE,Neural and Evolutionary Computing,cs.NE
+cs,Computer Science,cs.NI,Networking and Internet Architecture,cs.NI
+cs,Computer Science,cs.OH,Other Computer Science,cs.OH
+cs,Computer Science,cs.OS,Operating Systems,cs.OS
+cs,Computer Science,cs.PF,Performance,cs.PF
+cs,Computer Science,cs.PL,Programming Languages,cs.PL
+cs,Computer Science,cs.RO,Robotics,cs.RO
+cs,Computer Science,cs.SC,Symbolic Computation,cs.SC
+cs,Computer Science,cs.SD,Sound,cs.SD
+cs,Computer Science,cs.SE,Software Engineering,cs.SE
+cs,Computer Science,cs.SI,Social and Information Networks,cs.SI
+cs,Computer Science,cs.SY,Systems and Control,cs.SY
+cond-mat,Condensed Matter,cond-mat.dis-nn,Disordered Systems and Neural Networks,cond-mat.dis-nn
+cond-mat,Condensed Matter,cond-mat.mes-hall,Mesoscale and Nanoscale Physics,cond-mat.mes-hall
+cond-mat,Condensed Matter,cond-mat.mtrl-sci,Materials Science,cond-mat.mtrl-sci
+cond-mat,Condensed Matter,cond-mat.other,Other Condensed Matter,cond-mat.other
+cond-mat,Condensed Matter,cond-mat.quant-gas,Quantum Gases,cond-mat.quant-gas
+cond-mat,Condensed Matter,cond-mat.soft,Soft Condensed Matter,cond-mat.soft
+cond-mat,Condensed Matter,cond-mat.stat-mech,Statistical Mechanics,cond-mat.stat-mech
+cond-mat,Condensed Matter,cond-mat.str-el,Strongly Correlated Electrons,cond-mat.str-el
+cond-mat,Condensed Matter,cond-mat.supr-con,Superconductivity,cond-mat.supr-con
+econ,Economics,econ.EM,Econometrics,econ.EM
+econ,Economics,econ.GN,General Economics,econ.GN
+econ,Economics,econ.TH,Theoretical Economics,econ.TH
+eess,Electrical Engineering and Systems Science,eess.AS,Audio and Speech Processing,eess.AS
+eess,Electrical Engineering and Systems Science,eess.IV,Image and Video Processing,eess.IV
+eess,Electrical Engineering and Systems Science,eess.SP,Signal Processing,eess.SP
+eess,Electrical Engineering and Systems Science,eess.SY,Systems and Control,eess.SY
+gr-qc,General Relativity and Quantum Cosmology,gr-qc,General Relativity and Quantum Cosmology,gr-qc
+hep-ex,High Energy Physics - Experiment,hep-ex,High Energy Physics - Experiment,hep-ex
+hep-lat,High Energy Physics - Lattice,hep-lat,High Energy Physics - Lattice,hep-lat
+hep-ph,High Energy Physics - Phenomenology,hep-ph,High Energy Physics - Phenomenology,hep-ph
+hep-th,High Energy Physics - Theory,hep-th,High Energy Physics - Theory,hep-th
+math-ph,Mathematical Physics,math-ph,Mathematical Physics,math-ph
+math,Mathematics,math.AC,Commutative Algebra,math.AC
+math,Mathematics,math.AG,Algebraic Geometry,math.AG
+math,Mathematics,math.AP,Analysis of PDEs,math.AP
+math,Mathematics,math.AT,Algebraic Topology,math.AT
+math,Mathematics,math.CA,Classical Analysis and ODEs,math.CA
+math,Mathematics,math.CO,Combinatorics,math.CO
+math,Mathematics,math.CT,Category Theory,math.CT
+math,Mathematics,math.CV,Complex Variables,math.CV
+math,Mathematics,math.DG,Differential Geometry,math.DG
+math,Mathematics,math.DS,Dynamical Systems,math.DS
+math,Mathematics,math.FA,Functional Analysis,math.FA
+math,Mathematics,math.GM,General Mathematics,math.GM
+math,Mathematics,math.GN,General Topology,math.GN
+math,Mathematics,math.GR,Group Theory,math.GR
+math,Mathematics,math.GT,Geometric Topology,math.GT
+math,Mathematics,math.HO,History and Overview,math.HO
+math,Mathematics,math.IT,Information Theory,math.IT
+math,Mathematics,math.KT,K-Theory and Homology,math.KT
+math,Mathematics,math.LO,Logic,math.LO
+math,Mathematics,math.MG,Metric Geometry,math.MG
+math,Mathematics,math.MP,Mathematical Physics,math.MP
+math,Mathematics,math.NA,Numerical Analysis,math.NA
+math,Mathematics,math.NT,Number Theory,math.NT
+math,Mathematics,math.OA,Operator Algebras,math.OA
+math,Mathematics,math.OC,Optimization and Control,math.OC
+math,Mathematics,math.PR,Probability,math.PR
+math,Mathematics,math.QA,Quantum Algebra,math.QA
+math,Mathematics,math.RA,Rings and Algebras,math.RA
+math,Mathematics,math.RT,Representation Theory,math.RT
+math,Mathematics,math.SG,Symplectic Geometry,math.SG
+math,Mathematics,math.SP,Spectral Theory,math.SP
+math,Mathematics,math.ST,Statistics Theory,math.ST
+nlin,Nonlinear Sciences,nlin.AO,Adaptation and Self-Organizing Systems,nlin.AO
+nlin,Nonlinear Sciences,nlin.CD,Chaotic Dynamics,nlin.CD
+nlin,Nonlinear Sciences,nlin.CG,Cellular Automata and Lattice Gases,nlin.CG
+nlin,Nonlinear Sciences,nlin.PS,Pattern Formation and Solitons,nlin.PS
+nlin,Nonlinear Sciences,nlin.SI,Exactly Solvable and Integrable Systems,nlin.SI
+nucl-ex,Nuclear Experiment,nucl-ex,Nuclear Experiment,nucl-ex
+nucl-th,Nuclear Theory,nucl-th,Nuclear Theory,nucl-th
+physics,Physics,physics.acc-ph,Accelerator Physics,physics.acc-ph
+physics,Physics,physics.ao-ph,Atmospheric and Oceanic Physics,physics.ao-ph
+physics,Physics,physics.app-ph,Applied Physics,physics.app-ph
+physics,Physics,physics.atm-clus,Atomic and Molecular Clusters,physics.atm-clus
+physics,Physics,physics.atom-ph,Atomic Physics,physics.atom-ph
+physics,Physics,physics.bio-ph,Biological Physics,physics.bio-ph
+physics,Physics,physics.chem-ph,Chemical Physics,physics.chem-ph
+physics,Physics,physics.class-ph,Classical Physics,physics.class-ph
+physics,Physics,physics.comp-ph,Computational Physics,physics.comp-ph
+physics,Physics,physics.data-an,"Data Analysis, Statistics and Probability",physics.data-an
+physics,Physics,physics.ed-ph,Physics Education,physics.ed-ph
+physics,Physics,physics.flu-dyn,Fluid Dynamics,physics.flu-dyn
+physics,Physics,physics.gen-ph,General Physics,physics.gen-ph
+physics,Physics,physics.geo-ph,Geophysics,physics.geo-ph
+physics,Physics,physics.hist-ph,History and Philosophy of Physics,physics.hist-ph
+physics,Physics,physics.ins-det,Instrumentation and Detectors,physics.ins-det
+physics,Physics,physics.med-ph,Medical Physics,physics.med-ph
+physics,Physics,physics.optics,Optics,physics.optics
+physics,Physics,physics.plasm-ph,Plasma Physics,physics.plasm-ph
+physics,Physics,physics.pop-ph,Popular Physics,physics.pop-ph
+physics,Physics,physics.soc-ph,Physics and Society,physics.soc-ph
+physics,Physics,physics.space-ph,Space Physics,physics.space-ph
+q-bio,Quantitative Biology,q-bio.BM,Biomolecules,q-bio.BM
+q-bio,Quantitative Biology,q-bio.CB,Cell Behavior,q-bio.CB
+q-bio,Quantitative Biology,q-bio.GN,Genomics,q-bio.GN
+q-bio,Quantitative Biology,q-bio.MN,Molecular Networks,q-bio.MN
+q-bio,Quantitative Biology,q-bio.NC,Neurons and Cognition,q-bio.NC
+q-bio,Quantitative Biology,q-bio.OT,Other Quantitative Biology,q-bio.OT
+q-bio,Quantitative Biology,q-bio.PE,Populations and Evolution,q-bio.PE
+q-bio,Quantitative Biology,q-bio.QM,Quantitative Methods,q-bio.QM
+q-bio,Quantitative Biology,q-bio.SC,Subcellular Processes,q-bio.SC
+q-bio,Quantitative Biology,q-bio.TO,Tissues and Organs,q-bio.TO
+q-fin,Quantitative Finance,q-fin.CP,Computational Finance,q-fin.CP
+q-fin,Quantitative Finance,q-fin.EC,Economics,q-fin.EC
+q-fin,Quantitative Finance,q-fin.GN,General Finance,q-fin.GN
+q-fin,Quantitative Finance,q-fin.MF,Mathematical Finance,q-fin.MF
+q-fin,Quantitative Finance,q-fin.PM,Portfolio Management,q-fin.PM
+q-fin,Quantitative Finance,q-fin.PR,Pricing of Securities,q-fin.PR
+q-fin,Quantitative Finance,q-fin.RM,Risk Management,q-fin.RM
+q-fin,Quantitative Finance,q-fin.ST,Statistical Finance,q-fin.ST
+q-fin,Quantitative Finance,q-fin.TR,Trading and Market Microstructure,q-fin.TR
+quant-ph,Quantum Physics,quant-ph,Quantum Physics,quant-ph
+stat,Statistics,stat.AP,Applications,stat.AP
+stat,Statistics,stat.CO,Computation,stat.CO
+stat,Statistics,stat.ME,Methodology,stat.ME
+stat,Statistics,stat.ML,Machine Learning,stat.ML
+stat,Statistics,stat.OT,Other Statistics,stat.OT
+stat,Statistics,stat.TH,Statistics Theory,stat.TH
