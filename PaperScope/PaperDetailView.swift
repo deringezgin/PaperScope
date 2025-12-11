@@ -6,9 +6,7 @@ struct PaperDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                Text(paper.title)
-                    .font(.title2)
-                    .fontWeight(.bold)
+                MathText(paper.title, font: .title2.bold())
                     .foregroundColor(.primary)
 
                 Text(paper.authorsDisplay)
@@ -21,8 +19,7 @@ struct PaperDetailView: View {
                     .font(.headline)
                     .padding(.top, 8)
 
-                Text(paper.summary)
-                    .font(.body)
+                MathText(paper.summary, font: .body)
                     .lineSpacing(6)
             }
             .padding()

@@ -12,27 +12,42 @@ struct RootTabView: View {
         UITabBar.appearance().scrollEdgeAppearance = appearance
     }
     
+    @EnvironmentObject var navState: NavigationState
+    
     var body: some View {
-        TabView {
+        TabView(selection: Binding(
+            get: { navState.selectedTab },
+            set: { newTab in
+                if newTab == navState.selectedTab && newTab == 0 {
+                    // Re-tap on Recent (0)
+                    navState.refreshRecent()
+                }
+                navState.selectedTab = newTab
+            }
+        )) {
             RecentView()
                 .tabItem {
-                    Label("Recent", systemImage: "house")
+                    Label("Home", systemImage: "house")
                 }
+                .tag(0)
             
             ListsView()
                 .tabItem {
                     Label("Lists", systemImage: "list.bullet.rectangle")
                 }
+                .tag(1)
             
             SearchView()
                 .tabItem {
                     Label("Search", systemImage: "magnifyingglass")
                 }
+                .tag(2)
             
             SettingsView()
                 .tabItem {
                     Label("Settings", systemImage: "gearshape")
                 }
+                .tag(3)
         }
         // Common background for the whole app can be placed here if tabs don't have their own backgrounds
         .background(

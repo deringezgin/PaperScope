@@ -5,8 +5,7 @@ struct PaperCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(paper.title)
-                .font(.headline)
+            MathText(paper.title, font: .headline)
                 .foregroundColor(.primary)
                 .lineLimit(2)
 
@@ -15,8 +14,7 @@ struct PaperCardView: View {
                 .foregroundColor(.secondary)
                 .lineLimit(1)
 
-            Text(paper.summary)
-                .font(.footnote)
+            MathText(paper.summary, font: .footnote)
                 .foregroundColor(.secondary)
                 .lineLimit(3)
                 .padding(.top, 4)

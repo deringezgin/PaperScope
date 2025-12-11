@@ -33,12 +33,16 @@ struct Taxonomy {
             var categoryMap: [String: (name: String, subs: [TaxonomySubcategory])] = [:]
             
             for row in rows {
-                let columns = row.components(separatedBy: ",")
+                // let columns = row.components(separatedBy: ",") // Naive split fails on quotes
+                let columns = parseCSVRow(row)
+                
                 if columns.count >= 5 {
                     let mainId = columns[0].trimmingCharacters(in: .whitespaces)
                     let mainName = columns[1].trimmingCharacters(in: .whitespaces)
                     // let subId = columns[2]
-                    let subName = columns[3].trimmingCharacters(in: .whitespaces)
+                    // Clean quotes from the name if present
+                    let rawSubName = columns[3].trimmingCharacters(in: .whitespaces)
+                    let subName = rawSubName.trimmingCharacters(in: CharacterSet(charactersIn: "\""))
                     let subCode = columns[4].trimmingCharacters(in: .whitespaces)
                     
                     if mainId.isEmpty { continue }
@@ -62,5 +66,24 @@ struct Taxonomy {
             print("ERROR: Failed to load taxonomy csv: \(error)")
             return []
         }
+    }
+    
+    private static func parseCSVRow(_ row: String) -> [String] {
+        var result: [String] = []
+        var currentField = ""
+        var insideQuotes = false
+        
+        for char in row {
+            if char == "\"" {
+                insideQuotes.toggle()
+            } else if char == "," && !insideQuotes {
+                result.append(currentField)
+                currentField = ""
+            } else {
+                currentField.append(char)
+            }
+        }
+        result.append(currentField)
+        return result
     }
 }

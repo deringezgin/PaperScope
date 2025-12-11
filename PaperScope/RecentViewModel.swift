@@ -23,7 +23,7 @@ class RecentViewModel: ObservableObject {
     // category can be "cat:cs.AI+OR+cat:cs.LG", or just "cs.AI" if single
     func loadPapers(for category: String, reset: Bool = true) async {
         if reset {
-            papers = []
+            // papers = [] // Don't clear immediately to allow smooth refresh
             currentStart = 0
             errorMessage = nil
             isLoading = true
@@ -32,7 +32,6 @@ class RecentViewModel: ObservableObject {
             guard canLoadMore else { return }
             isLoadingMore = true
         }
-        
         
         do {
             let newPapers = try await api.fetchRecentPapers(
@@ -51,6 +50,17 @@ class RecentViewModel: ObservableObject {
             currentStart += newPapers.count
             
         } catch {
+            if let urlError = error as? URLError, urlError.code == .cancelled {
+                // Ignore cancellation
+                if reset { isLoading = false } else { isLoadingMore = false }
+                return
+            }
+            if let cocoaError = error as? CocoaError, cocoaError.code == .userCancelled {
+                 // Ignore cancellation
+                if reset { isLoading = false } else { isLoadingMore = false }
+                return
+            }
+            
             errorMessage = "Failed to load papers: \(error.localizedDescription)"
         }
         

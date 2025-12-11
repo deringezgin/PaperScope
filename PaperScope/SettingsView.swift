@@ -3,50 +3,51 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject var settings: AppSettings
     var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                Text("Settings")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal)
-                    .padding(.top)
-
-                VStack(spacing: 0) {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 20) {
+                    // Title is now handled by navigationTitle
+                    
+                    VStack(spacing: 0) {
                     // Category Selection
-                    NavigationLink(destination: CategorySelectionView()) {
-                        HStack {
-                            Text("Categories")
-                                .foregroundColor(.primary)
-                            Spacer()
-                            Text("\(settings.selectedCategories.count) selected")
-                                .foregroundColor(.secondary)
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(.secondary)
-                                .font(.caption)
+                        NavigationLink(destination: CategorySelectionView()) {
+                            HStack {
+                                Text("Home Feed Categories")
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                Text("\(settings.selectedCategories.count) selected")
+                                    .foregroundColor(.secondary)
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.secondary)
+                                    .font(.caption)
+                            }
+                            .padding()
+                            .contentShape(Rectangle())
                         }
-                        .padding()
+                        .buttonStyle(.plain)
+                        
+                        Divider()
+                        
+                        // Dark Mode Toggle
+                        Toggle("Dark Mode", isOn: $settings.isDarkMode)
+                            .padding()
+                        
+                        Divider()
+                        settingsRow(title: "Font Size", detail: "Coming Soon")
+                        Divider()
+                        settingsRow(title: "Account", detail: "Guest")
                     }
-                    
-                    Divider()
-                    
-                    // Dark Mode Toggle
-                    Toggle("Dark Mode", isOn: $settings.isDarkMode)
-                        .padding()
-                    
-                    Divider()
-                    settingsRow(title: "Font Size", detail: "Coming Soon")
-                    Divider()
-                    settingsRow(title: "Account", detail: "Guest")
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(15)
+                    .padding(.horizontal)
+                    .padding(.top) // Add some top padding since we removed the manual title
                 }
-                .background(.ultraThinMaterial)
-                .cornerRadius(15)
-                .padding(.horizontal)
             }
-        }
-        .background {
-             // Shared background logic or clear if handled by parent
-             Color.clear
+            .background {
+                 LinearGradient(colors: [.blue.opacity(0.1), .purple.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                     .ignoresSafeArea()
+            }
+            .navigationTitle("Settings")
         }
     }
 

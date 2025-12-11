@@ -71,4 +71,4 @@ def parse_taxonomy(html_path, csv_path):
             writer.writerow(cat)
             
 if __name__ == "__main__":
-    parse_taxonomy("/Users/deringezgin/Projects/PaperScope/Category Taxonomy.html", "/Users/deringezgin/Projects/PaperScope/taxonomy.csv")
+    parse_taxonomy("/Users/deringezgin/Projects/PaperScope/Category Taxonomy.html", "/Users/deringezgin/Projects/PaperScope/PaperScope/taxonomy.csv")

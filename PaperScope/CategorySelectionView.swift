@@ -2,44 +2,124 @@ import SwiftUI
 
 struct CategorySelectionView: View {
     @EnvironmentObject var settings: AppSettings
+    @State private var expandedSections: Set<String> = []
     
     var body: some View {
-        List {
-            ForEach(Taxonomy.mainCategories) { category in
-                Section(header: Text(category.name)) {
-                    ForEach(category.subcategories) { subcategory in
-                        HStack {
-                            Text(subcategory.name)
-                            Spacer()
-                            if settings.selectedCategories.contains(subcategory.code) {
-                                Image(systemName: "checkmark")
-                                    .foregroundColor(.blue)
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 10) {
+                ForEach(Taxonomy.mainCategories) { category in
+                    DisclosureGroup(
+                        isExpanded: Binding(
+                            get: { expandedSections.contains(category.id) },
+                            set: { isExpanded in
+                                if isExpanded {
+                                    expandedSections.insert(category.id)
+                                } else {
+                                    expandedSections.remove(category.id)
+                                }
+                            }
+                        )
+                    ) {
+                        VStack(alignment: .leading, spacing: 0) {
+                            ForEach(category.subcategories) { subcategory in
+                                Button(action: {
+                                    toggleSelection(for: subcategory.code)
+                                }) {
+                                    HStack {
+                                        Text(subcategory.name)
+                                            .foregroundColor(.primary)
+                                            .multilineTextAlignment(.leading)
+                                        Spacer()
+                                        if settings.selectedCategories.contains(subcategory.code) {
+                                            Image(systemName: "checkmark")
+                                                .foregroundColor(.blue)
+                                        } else {
+                                            Image(systemName: "circle")
+                                                .foregroundColor(.secondary.opacity(0.3))
+                                        }
+                                    }
+                                    .padding(.vertical, 12)
+                                    .padding(.horizontal)
+                                    .background(Color.clear) // Tappable area
+                                }
+                                Divider()
                             }
                         }
-                        .contentShape(Rectangle()) // Make the whole row tappable
-                        .onTapGesture {
-                            toggleSelection(for: subcategory.code)
+                    } label: {
+                        HStack {
+                            Text(category.name)
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            
+                            Spacer()
+                            
+                            // Section Actions
+                            Menu {
+                                Button("Select All") { selectAll(in: category) }
+                                Button("Deselect All") { deselectAll(in: category) }
+                            } label: {
+                                Image(systemName: "ellipsis.circle")
+                                    .padding(8)
+                            }
                         }
+                        .padding(.vertical, 8)
+                    }
+                    .padding(.horizontal)
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(10)
+                }
+            }
+            .padding()
+        }
+        .background {
+            LinearGradient(colors: [.blue.opacity(0.1), .purple.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                .ignoresSafeArea()
+        }
+        .navigationTitle("Home Feed Categories")
+        .toolbar(.hidden, for: .tabBar)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(settings.selectedCategories.isEmpty ? "Select All" : "Clear All") {
+                    if settings.selectedCategories.isEmpty {
+                        // Select All
+                        for category in Taxonomy.mainCategories {
+                            for sub in category.subcategories {
+                                settings.selectedCategories.insert(sub.code)
+                            }
+                        }
+                    } else {
+                        // Clear All
+                        settings.selectedCategories.removeAll()
                     }
                 }
             }
         }
-        .navigationTitle("Select Categories")
     }
     
     private func toggleSelection(for code: String) {
         if settings.selectedCategories.contains(code) {
-            // Prevent deselecting the last one so we always have at least one
-            if settings.selectedCategories.count > 1 {
-                settings.selectedCategories.remove(code)
-            }
+           settings.selectedCategories.remove(code)
         } else {
             settings.selectedCategories.insert(code)
+        }
+    }
+    
+    private func selectAll(in category: TaxonomyCategory) {
+        for sub in category.subcategories {
+            settings.selectedCategories.insert(sub.code)
+        }
+    }
+    
+    private func deselectAll(in category: TaxonomyCategory) {
+        for sub in category.subcategories {
+            settings.selectedCategories.remove(sub.code)
         }
     }
 }
 
 #Preview {
-    CategorySelectionView()
-        .environmentObject(AppSettings())
+    NavigationView {
+        CategorySelectionView()
+            .environmentObject(AppSettings())
+    }
 }

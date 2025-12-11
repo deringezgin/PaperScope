@@ -3,6 +3,7 @@ import SwiftUI
 struct RecentView: View {
     @StateObject private var viewModel = RecentViewModel()
     @EnvironmentObject var settings: AppSettings
+    @EnvironmentObject var navState: NavigationState
     @Namespace private var animationNamespace
     
     var body: some View {
@@ -32,9 +33,7 @@ struct RecentView: View {
             .navigationDestination(for: Paper.self) { paper in
                 PaperDetailView(paper: paper)
             }
-            .refreshable {
-                await viewModel.loadPapers(for: settings.selectedQuery)
-            }
+            // .refreshable removed as per user request to rely on auto-refresh/tap
         }
         .onAppear {
             if viewModel.papers.isEmpty {
@@ -47,6 +46,11 @@ struct RecentView: View {
             Task {
                 await viewModel.loadPapers(for: settings.selectedQuery)
             }
+        }
+        .onChange(of: navState.refreshRecentParams) {
+             Task {
+                 await viewModel.loadPapers(for: settings.selectedQuery, reset: true)
+             }
         }
     }
     
