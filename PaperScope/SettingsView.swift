@@ -29,8 +29,15 @@ struct SettingsView: View {
                         Divider()
                         
                         // Dark Mode Toggle
-                        Toggle("Dark Mode", isOn: $settings.isDarkMode)
-                            .padding()
+                        Toggle("Dark Mode", isOn: Binding(
+                            get: { settings.isDarkMode },
+                            set: { newValue in
+                                withAnimation {
+                                    settings.isDarkMode = newValue
+                                }
+                            }
+                        ))
+                        .padding()
                         
                         Divider()
                         settingsRow(title: "Font Size", detail: "Coming Soon")

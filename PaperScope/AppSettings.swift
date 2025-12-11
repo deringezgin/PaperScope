@@ -3,7 +3,7 @@ import Combine
 
 @MainActor
 class AppSettings: ObservableObject {
-    @Published var isDarkMode: Bool = false
+    @Published var isDarkMode: Bool = true
     
     // Store selected category codes (e.g. "cs.AI", "cs.LG")
     @Published var selectedCategories: Set<String> = ["cs.AI"]
