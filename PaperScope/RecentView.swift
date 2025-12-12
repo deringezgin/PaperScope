@@ -4,11 +4,25 @@ struct RecentView: View {
     @StateObject private var viewModel = RecentViewModel()
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var navState: NavigationState
-    @Namespace private var animationNamespace
-    
     var body: some View {
         NavigationStack {
             ScrollView {
+                // Custom Header
+                HStack {
+                    Text("Recent Papers")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                    Spacer()
+                    NavigationLink(destination: SettingsView()) {
+                        Image(systemName: "gearshape.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(.primary)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal)
+                .padding(.top)
+
                 LazyVStack(spacing: 20) {
                     if let error = viewModel.errorMessage {
                         errorView(error)
@@ -25,7 +39,7 @@ struct RecentView: View {
                 }
                 .padding()
             }
-            .navigationTitle("Recent Papers")
+            .toolbar(.hidden, for: .navigationBar)
             .background {
                 LinearGradient(colors: [.blue.opacity(0.1), .purple.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing)
                     .ignoresSafeArea()

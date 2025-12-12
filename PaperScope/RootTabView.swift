@@ -43,11 +43,7 @@ struct RootTabView: View {
                 }
                 .tag(2)
             
-            SettingsView()
-                .tabItem {
-                    Label("Settings", systemImage: "gearshape")
-                }
-                .tag(3)
+
         }
         // Common background for the whole app can be placed here if tabs don't have their own backgrounds
         .background(
