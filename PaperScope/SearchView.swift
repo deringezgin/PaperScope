@@ -3,14 +3,27 @@ import SwiftUI
 struct SearchView: View {
     @StateObject private var viewModel = SearchViewModel()
     
+    @State private var showFilters = false
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
                 // Search Bar Area
                 VStack(spacing: 12) {
-                    HStack(spacing: 8) {
+                    HStack(spacing: 12) {
                         // Glassy Search Capsule
                         HStack(spacing: 8) {
+                            // Text Field
+                            TextField("Search in ...", text: $viewModel.searchText)
+                                .textFieldStyle(.plain)
+                                .submitLabel(.search)
+                                .padding(.leading, 8)
+                                .onSubmit {
+                                    Task { await viewModel.performSearch() }
+                                }
+                            
+                            Spacer()
+                            
                             // Field Picker
                             Menu {
                                 Picker("Field", selection: $viewModel.selectedField) {
@@ -28,87 +41,72 @@ struct SearchView: View {
                                         .font(.caption2)
                                         .foregroundColor(.secondary)
                                 }
-                                .padding(.vertical, 4)
-                                .padding(.horizontal, 8)
-                                .background(Color.primary.opacity(0.05))
+                                .padding(.vertical, 6)
+                                .padding(.horizontal, 10)
+                                .background(Color.secondary.opacity(0.1))
                                 .cornerRadius(8)
-                            }
-                            
-                            // Text Field
-                            TextField("Search papers...", text: $viewModel.searchText)
-                                .textFieldStyle(.plain)
-                                .submitLabel(.search)
-                                .onSubmit {
-                                    Task { await viewModel.performSearch() }
-                                }
-                            
-                            // Search Button
-                            Button(action: {
-                                Task { await viewModel.performSearch() }
-                            }) {
-                                Image(systemName: "magnifyingglass")
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.white)
-                                    .padding(8)
-                                    .background(Color.blue)
-                                    .clipShape(Circle())
-                                    .shadow(color: .blue.opacity(0.4), radius: 4, x: 0, y: 2)
                             }
                         }
                         .padding(8)
                         .background(.ultraThinMaterial)
                         .clipShape(Capsule())
                         .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
+                        
+                        // Adjustment Button
+                        Button(action: {
+                            withAnimation(.spring()) {
+                                showFilters.toggle()
+                            }
+                        }) {
+                            Image(systemName: "slider.horizontal.3")
+                                .font(.title3)
+                                .foregroundColor(.primary)
+                                .padding(12)
+                                .background(.ultraThinMaterial)
+                                .clipShape(Circle())
+                                .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
+                        }
                     }
                     .padding(.horizontal)
                     .padding(.top, 8)
                     
-                    VStack(spacing: 0) {
-                         Toggle("Exact Match", isOn: $viewModel.isExactMatch)
-                            .font(.subheadline)
-                            .padding(.horizontal)
-                            .padding(.vertical, 8)
-                        
-                        Divider()
-                            .padding(.horizontal)
-                        
-                        // Advanced Toggle
-                        DisclosureGroup(
-                            isExpanded: $viewModel.showAdvanced,
-                            content: {
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack(spacing: 10) {
-                                        ForEach(Taxonomy.mainCategories) { category in
-                                            FilterChip(
-                                                title: category.name,
-                                                isSelected: viewModel.selectedCategories.contains(category.id),
-                                                action: {
-                                                    if viewModel.selectedCategories.contains(category.id) {
-                                                        viewModel.selectedCategories.remove(category.id)
-                                                    } else {
-                                                        viewModel.selectedCategories.insert(category.id)
-                                                    }
+                    if showFilters {
+                        VStack(spacing: 0) {
+                             Toggle("Exact Match", isOn: $viewModel.isExactMatch)
+                                .font(.subheadline)
+                                .padding(.horizontal)
+                                .padding(.vertical, 8)
+                            
+                            Divider()
+                                .padding(.horizontal)
+                            
+                            // Taxonomy Filters
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 10) {
+                                    ForEach(Taxonomy.mainCategories) { category in
+                                        FilterChip(
+                                            title: category.name,
+                                            isSelected: viewModel.selectedCategories.contains(category.id),
+                                            action: {
+                                                if viewModel.selectedCategories.contains(category.id) {
+                                                    viewModel.selectedCategories.remove(category.id)
+                                                } else {
+                                                    viewModel.selectedCategories.insert(category.id)
                                                 }
-                                            )
-                                        }
+                                            }
+                                        )
                                     }
-                                    .padding(.vertical, 12)
-                                    .padding(.horizontal)
                                 }
-                            },
-                            label: {
-                                Text("Advanced Search (Sections)")
-                                    .font(.subheadline)
-                                    .foregroundColor(.primary)
+                                .padding(.vertical, 12)
+                                .padding(.horizontal)
                             }
-                        )
-                        .padding()
-                        .tint(.primary)
+                        }
+                        .background(.ultraThinMaterial)
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .padding(.horizontal)
+                        .padding(.bottom, 8)
+                        .transition(.move(edge: .top).combined(with: .opacity))
                     }
-                    .background(.ultraThinMaterial)
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                    .padding(.horizontal)
-                    .padding(.bottom, 8)
                 }
                 .padding(.bottom, 8) // Spacing before results
                 
