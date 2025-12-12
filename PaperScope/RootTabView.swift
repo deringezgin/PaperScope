@@ -1,17 +1,6 @@
 import SwiftUI
 
 struct RootTabView: View {
-    
-    init() {
-        // Customizing the Tab Bar appearance for Glassmorphism feel
-        let appearance = UITabBarAppearance()
-        appearance.configureWithTransparentBackground()
-        appearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterial)
-        
-        UITabBar.appearance().standardAppearance = appearance
-        UITabBar.appearance().scrollEdgeAppearance = appearance
-    }
-    
     @EnvironmentObject var navState: NavigationState
     
     var body: some View {
@@ -25,26 +14,19 @@ struct RootTabView: View {
                 navState.selectedTab = newTab
             }
         )) {
-            RecentView()
-                .tabItem {
-                    Label("Home", systemImage: "house")
-                }
-                .tag(0)
+            Tab("Home", systemImage: "house", value: 0) {
+                RecentView()
+            }
             
-            ListsView()
-                .tabItem {
-                    Label("Lists", systemImage: "list.bullet.rectangle")
-                }
-                .tag(1)
+            Tab("Lists", systemImage: "list.bullet.rectangle", value: 1) {
+                ListsView()
+            }
             
-            SearchView()
-                .tabItem {
-                    Label("Search", systemImage: "magnifyingglass")
-                }
-                .tag(2)
-            
-
+            Tab(value: 2, role: .search) {
+                SearchView()
+            }
         }
+        .tabBarMinimizeBehavior(.onScrollDown)
         // Common background for the whole app can be placed here if tabs don't have their own backgrounds
         .background(
             LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.2), Color.purple.opacity(0.3), Color.black.opacity(0.8)]), startPoint: .topLeading, endPoint: .bottomTrailing)

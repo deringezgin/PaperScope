@@ -4,16 +4,18 @@ struct RecentView: View {
     @StateObject private var viewModel = RecentViewModel()
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var navState: NavigationState
+    @State private var showSettings = false
     var body: some View {
         NavigationStack {
             ScrollView {
                 // Custom Header
-                HStack {
+                // Custom Header
+                HStack(alignment: .top) {
                     Text("Recent Papers")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
+                        .font(.custom("CMUSerif-Bold", size: 34))
+                        .padding(.top, 80)
                     Spacer()
-                    NavigationLink(destination: SettingsView()) {
+                    Button(action: { showSettings = true }) {
                         Image(systemName: "gearshape.circle.fill")
                             .font(.title2)
                             .foregroundColor(.primary)
@@ -40,6 +42,10 @@ struct RecentView: View {
                 .padding()
             }
             .toolbar(.hidden, for: .navigationBar)
+            .sheet(isPresented: $showSettings) {
+                SettingsView()
+                    .presentationDragIndicator(.visible)
+            }
             .background {
                 LinearGradient(colors: [.blue.opacity(0.1), .purple.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing)
                     .ignoresSafeArea()

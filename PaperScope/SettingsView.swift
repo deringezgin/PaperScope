@@ -2,61 +2,80 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var settings: AppSettings
+    @Environment(\.dismiss) var dismiss
     var body: some View {
 
-        ScrollView {
-            VStack(spacing: 20) {
-                // Title is now handled by navigationTitle
-                
-                VStack(spacing: 0) {
-                // Category Selection
-                    NavigationLink(destination: CategorySelectionView()) {
-                        HStack {
-                            Text("Home Feed Categories")
-                                .foregroundColor(.primary)
-                            Spacer()
-                            Text("\(settings.selectedCategories.count) selected")
-                                .foregroundColor(.secondary)
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(.secondary)
-                                .font(.caption)
-                        }
-                        .padding()
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
+
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 20) {
+                    // Title is now handled by navigationTitle
                     
-                    Divider()
-                    
-                    // Dark Mode Toggle
-                    Toggle("Dark Mode", isOn: Binding(
-                        get: { settings.isDarkMode },
-                        set: { newValue in
-                            withAnimation {
-                                settings.isDarkMode = newValue
+                    VStack(spacing: 0) {
+                    // Category Selection
+                        NavigationLink(destination: CategorySelectionView()) {
+                            HStack {
+                                Text("Home Feed Categories")
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                Text("\(settings.selectedCategories.count) selected")
+                                    .foregroundColor(.secondary)
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.secondary)
+                                    .font(.caption)
                             }
+                            .padding()
+                            .contentShape(Rectangle())
                         }
-                    ))
-                    .padding()
-                    
-                    Divider()
-                    settingsRow(title: "Font Size", detail: "Coming Soon")
-                    Divider()
-                    settingsRow(title: "Account", detail: "Guest")
+                        .buttonStyle(.plain)
+                        
+                        Divider()
+                        
+                        // Dark Mode Toggle
+                        Toggle("Dark Mode", isOn: Binding(
+                            get: { settings.isDarkMode },
+                            set: { newValue in
+                                withAnimation {
+                                    settings.isDarkMode = newValue
+                                }
+                            }
+                        ))
+                        .padding()
+                        
+                        Divider()
+                        settingsRow(title: "Font Size", detail: "Coming Soon")
+                        Divider()
+                        settingsRow(title: "Account", detail: "Guest")
+                    }
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(15)
+                    .padding(.horizontal)
+                    .padding(.top) // Add some top padding since we removed the manual title
                 }
-                .background(.ultraThinMaterial)
-                .cornerRadius(15)
-                .padding(.horizontal)
-                .padding(.top) // Add some top padding since we removed the manual title
             }
+            .background {
+                 LinearGradient(colors: [.blue.opacity(0.1), .purple.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                     .ignoresSafeArea()
+            }
+            .navigationTitle("Settings")
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.primary)
+                            .padding(8)
+                            .background(Color.gray.opacity(0.15))
+                            .clipShape(Circle())
+                    }
+                }
+            }
+            .preferredColorScheme(settings.isDarkMode ? .dark : .light)
         }
-        .background {
-             LinearGradient(colors: [.blue.opacity(0.1), .purple.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                 .ignoresSafeArea()
-        }
-        .navigationTitle("Settings")
-        .toolbar(.hidden, for: .tabBar)
     }
+
 
 
     private func settingsRow(title: String, detail: String) -> some View {
