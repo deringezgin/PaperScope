@@ -8,23 +8,6 @@ struct RecentView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                // Custom Header
-                // Custom Header
-                HStack(alignment: .top) {
-                    Text("Recent Papers")
-                        .font(.custom("CMUSerif-Bold", size: 34))
-                        .padding(.top, 80)
-                    Spacer()
-                    Button(action: { showSettings = true }) {
-                        Image(systemName: "gearshape.circle.fill")
-                            .font(.title2)
-                            .foregroundColor(.primary)
-                    }
-                    .buttonStyle(.plain)
-                }
-                .padding(.horizontal)
-                .padding(.top)
-
                 LazyVStack(spacing: 20) {
                     if let error = viewModel.errorMessage {
                         errorView(error)
@@ -41,7 +24,20 @@ struct RecentView: View {
                 }
                 .padding()
             }
-            .toolbar(.hidden, for: .navigationBar)
+            .navigationTitle("Recent Papers")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: { showSettings = true }) {
+                        Image(systemName: "gearshape.fill")
+                            .font(.system(size: 20)) // Slightly larger icon inside
+                            .foregroundColor(.primary)
+                            .padding(10) // Padding for the bubble
+                            .background(Color.clear) // Transparent background
+                            .clipShape(Circle())
+                            .contentShape(Circle()) // Improve tap area
+                    }
+                }
+            }
             .sheet(isPresented: $showSettings) {
                 SettingsView()
                     .presentationDragIndicator(.visible)

@@ -64,11 +64,12 @@ struct SettingsView: View {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark")
-                            .font(.system(size: 14, weight: .bold))
+                            .font(.system(size: 20))
                             .foregroundColor(.primary)
-                            .padding(8)
-                            .background(Color.gray.opacity(0.15))
+                            .padding(10)
+                            .background(Color.clear)
                             .clipShape(Circle())
+                            .contentShape(Circle())
                     }
                 }
             }
