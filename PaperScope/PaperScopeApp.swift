@@ -16,14 +16,25 @@ struct PaperScopeApp: App {
         // Register Fonts
         let fontNames = ["cmu.serif-bold", "cmu.serif-roman", "cmu.serif-italic"]
         for name in fontNames {
-            if let fontURL = Bundle.main.url(forResource: name, withExtension: "ttf", subdirectory: "assets/fonts") {
+            var fontURL: URL?
+            // Try multiple paths
+            let subdirectories = ["assets/fonts", "fonts", nil]
+            
+            for subdirectory in subdirectories {
+                if let url = Bundle.main.url(forResource: name, withExtension: "ttf", subdirectory: subdirectory) {
+                    fontURL = url
+                    break
+                }
+            }
+            
+            if let fontURL = fontURL {
                 var error: Unmanaged<CFError>?
                 CTFontManagerRegisterFontsForURL(fontURL as CFURL, .process, &error)
                 if let error = error?.takeRetainedValue() {
-                    print("Error registering font: \(error)")
+                    print("Error registering font \(name): \(error)")
                 }
             } else {
-                 print("Failed to find font \(name)")
+                 print("Failed to find font \(name) in bundle")
             }
         }
 
