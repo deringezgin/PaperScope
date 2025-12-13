@@ -5,9 +5,10 @@ struct SearchView: View {
     @EnvironmentObject var navState: NavigationState
     
     @State private var showFilters = false
+    @State private var path = NavigationPath()
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             VStack(spacing: 0) {
                 // Search Bar Area
                 VStack(spacing: 12) {
@@ -210,6 +211,7 @@ struct SearchView: View {
         }
         .onAppear {
             if let request = navState.pendingSearch {
+                path = NavigationPath()
                 viewModel.searchText = request.term
                 viewModel.selectedField = request.field
                 viewModel.isExactMatch = request.exact
@@ -221,6 +223,7 @@ struct SearchView: View {
         }
         .onChange(of: navState.pendingSearch) { request in
             if let request = request {
+                path = NavigationPath()
                 viewModel.searchText = request.term
                 viewModel.selectedField = request.field
                 viewModel.isExactMatch = request.exact
