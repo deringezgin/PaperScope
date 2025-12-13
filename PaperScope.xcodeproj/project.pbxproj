@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		E5CC3C742EEB3AEC0065F3CD /* LaTeXSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = E5CC3C732EEB3AEC0065F3CD /* LaTeXSwiftUI */; };
+		E5D42A632EECF52400DD1FC6 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = E5D42A622EECF52400DD1FC6 /* SwiftSoup */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E5CC3C742EEB3AEC0065F3CD /* LaTeXSwiftUI in Frameworks */,
+				E5D42A632EECF52400DD1FC6 /* SwiftSoup in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -71,6 +73,7 @@
 			name = PaperScope;
 			packageProductDependencies = (
 				E5CC3C732EEB3AEC0065F3CD /* LaTeXSwiftUI */,
+				E5D42A622EECF52400DD1FC6 /* SwiftSoup */,
 			);
 			productName = PaperScope;
 			productReference = E5BBFA912EEB21C000D8EC4B /* PaperScope.app */;
@@ -102,6 +105,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				E5CC3C722EEB3AEC0065F3CD /* XCRemoteSwiftPackageReference "LaTeXSwiftUI" */,
+				E5D42A612EECF52400DD1FC6 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E5BBFA922EEB21C000D8EC4B /* Products */;
@@ -355,6 +359,14 @@
 				kind = branch;
 			};
 		};
+		E5D42A612EECF52400DD1FC6 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.11.3;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -362,6 +374,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = E5CC3C722EEB3AEC0065F3CD /* XCRemoteSwiftPackageReference "LaTeXSwiftUI" */;
 			productName = LaTeXSwiftUI;
+		};
+		E5D42A622EECF52400DD1FC6 /* SwiftSoup */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E5D42A612EECF52400DD1FC6 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			productName = SwiftSoup;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
