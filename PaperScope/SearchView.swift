@@ -221,7 +221,7 @@ struct SearchView: View {
                 }
             }
         }
-        .onChange(of: navState.pendingSearch) { request in
+        .onChange(of: navState.pendingSearch) { _, request in
             if let request = request {
                 path = NavigationPath()
                 viewModel.searchText = request.term
