@@ -14,7 +14,7 @@ struct SearchView: View {
                         // Glassy Search Capsule
                         HStack(spacing: 8) {
                             // Text Field
-                            TextField("Search in ...", text: $viewModel.searchText)
+                            TextField("Search in \(viewModel.selectedField.rawValue)...", text: $viewModel.searchText)
                                 .textFieldStyle(.plain)
                                 .submitLabel(.search)
                                 .padding(.leading, 8)
@@ -23,29 +23,6 @@ struct SearchView: View {
                                 }
                             
                             Spacer()
-                            
-                            // Field Picker
-                            Menu {
-                                Picker("Field", selection: $viewModel.selectedField) {
-                                    ForEach(SearchField.allCases) { field in
-                                        Text(field.rawValue).tag(field)
-                                    }
-                                }
-                            } label: {
-                                HStack(spacing: 4) {
-                                    Text(viewModel.selectedField.rawValue)
-                                        .font(.caption)
-                                        .fontWeight(.medium)
-                                        .foregroundColor(.secondary)
-                                    Image(systemName: "chevron.down")
-                                        .font(.caption2)
-                                        .foregroundColor(.secondary)
-                                }
-                                .padding(.vertical, 6)
-                                .padding(.horizontal, 10)
-                                .background(Color.secondary.opacity(0.1))
-                                .cornerRadius(8)
-                            }
                         }
                         .padding(8)
                         .background(.ultraThinMaterial)
@@ -54,14 +31,15 @@ struct SearchView: View {
                         
                         // Adjustment Button
                         Button(action: {
-                            withAnimation(.spring()) {
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
                                 showFilters.toggle()
                             }
                         }) {
                             Image(systemName: "slider.horizontal.3")
                                 .font(.title3)
-                                .foregroundColor(.primary)
+                                .foregroundColor(showFilters ? .white : .primary)
                                 .padding(12)
+                                .background(showFilters ? Color.blue : Color.clear)
                                 .background(.ultraThinMaterial)
                                 .clipShape(Circle())
                                 .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
@@ -72,32 +50,66 @@ struct SearchView: View {
                     
                     if showFilters {
                         VStack(spacing: 0) {
+                            // Field Selection
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Field")
+                                    .font(.subheadline)
+                                    .padding(.horizontal)
+                                    .padding(.top, 12)
+                                
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 10) {
+                                        ForEach(SearchField.allCases) { field in
+                                            FilterChip(
+                                                title: field.rawValue,
+                                                isSelected: viewModel.selectedField == field,
+                                                action: {
+                                                    viewModel.selectedField = field
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
+                            
+                            Divider()
+                                .padding(.vertical, 8)
+                                .padding(.horizontal)
+
                              Toggle("Exact Match", isOn: $viewModel.isExactMatch)
                                 .font(.subheadline)
                                 .padding(.horizontal)
-                                .padding(.vertical, 8)
+                                .padding(.bottom, 8)
                             
                             Divider()
                                 .padding(.horizontal)
                             
-                            // Taxonomy Filters
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 10) {
-                                    ForEach(Taxonomy.mainCategories) { category in
-                                        FilterChip(
-                                            title: category.name,
-                                            isSelected: viewModel.selectedCategories.contains(category.id),
-                                            action: {
-                                                if viewModel.selectedCategories.contains(category.id) {
-                                                    viewModel.selectedCategories.remove(category.id)
-                                                } else {
-                                                    viewModel.selectedCategories.insert(category.id)
+                            // Taxonomy Filters (Categories)
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Categories")
+                                    .font(.subheadline)
+                                    .padding(.horizontal)
+                                    .padding(.top, 8)
+                                    
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 10) {
+                                        ForEach(Taxonomy.mainCategories) { category in
+                                            FilterChip(
+                                                title: category.name,
+                                                isSelected: viewModel.selectedCategories.contains(category.id),
+                                                action: {
+                                                    if viewModel.selectedCategories.contains(category.id) {
+                                                        viewModel.selectedCategories.remove(category.id)
+                                                    } else {
+                                                        viewModel.selectedCategories.insert(category.id)
+                                                    }
                                                 }
-                                            }
-                                        )
+                                            )
+                                        }
                                     }
+                                    .padding(.vertical, 12)
                                 }
-                                .padding(.vertical, 12)
                                 .padding(.horizontal)
                             }
                         }
@@ -105,7 +117,7 @@ struct SearchView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         .padding(.horizontal)
                         .padding(.bottom, 8)
-                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .topTrailing)))
                     }
                 }
                 .padding(.bottom, 8) // Spacing before results
@@ -161,13 +173,31 @@ struct SearchView: View {
                                     .frame(maxWidth: .infinity)
                                     .background(.ultraThinMaterial)
                                     .cornerRadius(12)
+                                    .background(.ultraThinMaterial)
+                                    .cornerRadius(12)
                                 }
                             }
                             .padding()
                         }
+                        .scrollDismissesKeyboard(.interactively)
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .contentShape(Rectangle()) // Ensure empty areas are tappable
+                .onTapGesture {
+                    hideKeyboard()
+                }
+                .overlay {
+                    if showFilters {
+                        Color.black.opacity(0.001)
+                            .onTapGesture {
+                                hideKeyboard()
+                                withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                                    showFilters = false
+                                }
+                            }
+                    }
+                }
             }
             .navigationTitle("Search")
             .background {
@@ -177,6 +207,10 @@ struct SearchView: View {
                 PaperDetailView(paper: paper)
             }
         }
+    }
+    
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 
