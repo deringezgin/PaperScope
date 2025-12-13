@@ -3,6 +3,15 @@ import SwiftUI
 struct PaperDetailView: View {
     let paper: Paper
     @EnvironmentObject var navState: NavigationState
+    
+    // Helper to constructing HTML URL from abstract URL
+    private var htmlUrl: URL? {
+        guard let absString = paper.linkURL?.absoluteString else { return nil }
+        // Simple replacement of /abs/ with /html/
+        // E.g. https://arxiv.org/abs/2509.13656v1 -> https://arxiv.org/html/2509.13656v1
+        let htmlString = absString.replacingOccurrences(of: "/abs/", with: "/html/")
+        return URL(string: htmlString)
+    }
 
     var body: some View {
         ScrollView {
@@ -40,18 +49,38 @@ struct PaperDetailView: View {
                     .lineSpacing(6)
                 
                 if let url = paper.linkURL {
-                    Link(destination: url) {
-                        HStack {
-                            Text("View in arXiv")
-                                .fontWeight(.semibold)
-                            Image(systemName: "arrow.up.right.square")
+                    HStack(spacing: 12) {
+                        // Original "View in arXiv"
+                        Link(destination: url) {
+                            HStack {
+                                Text("View in arXiv")
+                                    .fontWeight(.semibold)
+                                Image(systemName: "arrow.up.right.square")
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue.opacity(0.1))
+                            .foregroundColor(.blue)
+                            .cornerRadius(12)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(12)
+
+                        // New "Read Paper" button
+                        if let readUrl = htmlUrl {
+                            NavigationLink(destination: ReaderView(paperUrl: readUrl)) {
+                                HStack {
+                                    Text("Read Paper")
+                                        .fontWeight(.semibold)
+                                    Image(systemName: "doc.text.viewfinder")
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(12)
+                            }
+                        }
                     }
+
                 }
 
             }
