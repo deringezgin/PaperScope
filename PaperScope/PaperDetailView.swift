@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PaperDetailView: View {
     let paper: Paper
+    @EnvironmentObject var navState: NavigationState
 
     var body: some View {
         ScrollView {
@@ -9,7 +10,17 @@ struct PaperDetailView: View {
                 MathText(paper.title, font: .title2.bold())
                     .foregroundColor(.primary)
 
-                Text(paper.authorsDisplay)
+                AuthorsFlowLayout(alignment: .leading, spacing: 6) {
+                    ForEach(Array(paper.authors.enumerated()), id: \.offset) { index, author in
+                        Button(action: {
+                            navState.search(for: author, field: .author, exact: true)
+                        }) {
+                            Text(author + (index == paper.authors.count - 1 ? "" : ","))
+                                .foregroundColor(.secondary)
+                                .underline(true, color: .secondary.opacity(0.5))
+                        }
+                    }
+                }
                     .font(.headline)
                     .foregroundColor(.secondary)
 
@@ -64,5 +75,66 @@ struct PaperDetailView: View {
 #Preview {
     NavigationView {
         PaperDetailView(paper: MockData.papers[0])
+    }
+}
+
+struct AuthorsFlowLayout: Layout {
+    var alignment: Alignment = .leading
+    var spacing: CGFloat = 4
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let rows = arrangeSubviews(proposal: proposal, subviews: subviews)
+        return rows.last?.maxY ?? .zero
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let rows = arrangeSubviews(proposal: proposal, subviews: subviews)
+        for row in rows {
+            for item in row.items {
+                item.subview.place(at: CGPoint(x: bounds.minX + item.x, y: bounds.minY + row.y), proposal: .unspecified)
+            }
+        }
+    }
+    
+    private func arrangeSubviews(proposal: ProposedViewSize, subviews: Subviews) -> [Row] {
+        var rows: [Row] = []
+        let maxWidth = proposal.width ?? 0
+        var currentX: CGFloat = 0
+        var currentY: CGFloat = 0
+        var currentRowItems: [RowItem] = []
+        var rowHeight: CGFloat = 0
+        
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            if currentX + size.width > maxWidth && !currentRowItems.isEmpty {
+                // New row
+                rows.append(Row(items: currentRowItems, y: currentY, maxY: CGSize(width: maxWidth, height: currentY + rowHeight)))
+                currentX = 0
+                currentY += rowHeight + spacing
+                currentRowItems = []
+                rowHeight = 0
+            }
+            
+            currentRowItems.append(RowItem(subview: subview, x: currentX))
+            currentX += size.width + spacing
+            rowHeight = max(rowHeight, size.height)
+        }
+        if !currentRowItems.isEmpty {
+             rows.append(Row(items: currentRowItems, y: currentY, maxY: CGSize(width: maxWidth, height: currentY + rowHeight)))
+        }
+        if rows.isEmpty {
+            return [Row(items: [], y: 0, maxY: .zero)]
+        }
+        return rows
+    }
+    
+    private struct Row {
+        var items: [RowItem]
+        var y: CGFloat
+        var maxY: CGSize
+    }
+    private struct RowItem {
+        var subview: LayoutSubview
+        var x: CGFloat
     }
 }

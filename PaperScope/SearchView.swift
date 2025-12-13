@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SearchView: View {
     @StateObject private var viewModel = SearchViewModel()
+    @EnvironmentObject var navState: NavigationState
     
     @State private var showFilters = false
 
@@ -205,6 +206,28 @@ struct SearchView: View {
             }
             .navigationDestination(for: Paper.self) { paper in
                 PaperDetailView(paper: paper)
+            }
+        }
+        .onAppear {
+            if let request = navState.pendingSearch {
+                viewModel.searchText = request.term
+                viewModel.selectedField = request.field
+                viewModel.isExactMatch = request.exact
+                Task {
+                    await viewModel.performSearch()
+                    navState.pendingSearch = nil
+                }
+            }
+        }
+        .onChange(of: navState.pendingSearch) { request in
+            if let request = request {
+                viewModel.searchText = request.term
+                viewModel.selectedField = request.field
+                viewModel.isExactMatch = request.exact
+                Task {
+                    await viewModel.performSearch()
+                    navState.pendingSearch = nil
+                }
             }
         }
     }
