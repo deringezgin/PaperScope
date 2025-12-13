@@ -13,6 +13,12 @@ struct PaperDetailView: View {
                     .font(.headline)
                     .foregroundColor(.secondary)
 
+                // Divider removed as per request
+                Text("Added on: \(paper.published.formatted(date: .long, time: .omitted))")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .padding(.top, 4)
+                
                 Divider()
 
                 Text("Abstract")
@@ -21,6 +27,22 @@ struct PaperDetailView: View {
 
                 MathText(paper.summary, font: .body)
                     .lineSpacing(6)
+                
+                if let url = paper.linkURL {
+                    Link(destination: url) {
+                        HStack {
+                            Text("View in arXiv")
+                                .fontWeight(.semibold)
+                            Image(systemName: "arrow.up.right.square")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
+                    }
+                }
+
             }
             .padding()
             .background(.ultraThinMaterial)
@@ -35,6 +57,8 @@ struct PaperDetailView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
     }
+    
+
 }
 
 #Preview {
