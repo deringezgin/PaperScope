@@ -86,6 +86,38 @@ struct WebView: UIViewRepresentable {
             const newContent = document.createElement('div');
             newContent.className = 'reconstructed-paper';
             
+            // 1b. Inject Back-Links for Citations (Fixing "upward buttons")
+            // We iterate all citations in the text, give them IDs, and add a link back in the bibliography.
+            let citationCount = 0;
+            document.querySelectorAll('.ltx_cite .ltx_ref').forEach(ref => {
+                const href = ref.getAttribute('href');
+                if (href && href.startsWith('#')) {
+                    const targetId = href.substring(1); // e.g., bib.bib1
+                    const targetEl = document.getElementById(targetId);
+                    if (targetEl) {
+                        citationCount++;
+                        const backId = 'citation-back-' + citationCount;
+                        
+                        // Add ID to the citation in text so we can jump back to it
+                        ref.id = backId;
+                        
+                        // Create the back button
+                        const backBtn = document.createElement('a');
+                        backBtn.href = '#' + backId;
+                        backBtn.className = 'citation-back-link';
+                        backBtn.innerHTML = '↑'; // Upward arrow
+                        backBtn.style.marginLeft = '8px';
+                        backBtn.style.textDecoration = 'none';
+                        backBtn.style.color = '#007AFF';
+                        backBtn.style.fontWeight = 'bold';
+                        
+                        // Append to the bibliography item
+                        // We check if it already has a container for back-links or just append
+                        targetEl.appendChild(backBtn);
+                    }
+                }
+            });
+            
             allowedSelectors.forEach(selector => {
                 const elements = document.querySelectorAll(selector);
                 elements.forEach(el => {
@@ -233,6 +265,28 @@ struct WebView: UIViewRepresentable {
             DispatchQueue.main.async {
                 self.parent.isLoading = false
             }
+        }
+        
+        // Handle links: Internal (anchor) -> Allow, External -> Safari
+        func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+            if navigationAction.navigationType == .linkActivated, let url = navigationAction.request.url {
+                // Check if it's an internal link (same page anchor)
+                // We compare the base URL (ignoring fragment) to the target URL
+                if let currentURL = webView.url,
+                   url.host == currentURL.host,
+                   url.path == currentURL.path {
+                    // It's likely an anchor link on the same page
+                    decisionHandler(.allow)
+                    return
+                }
+                
+                // It's an external link (or different page), open in Safari
+                UIApplication.shared.open(url)
+                decisionHandler(.cancel)
+                return
+            }
+            
+            decisionHandler(.allow)
         }
     }
 }
