@@ -72,7 +72,7 @@ struct PaperDetailView: View {
                             }
 
                             if case .available(let readUrl) = htmlAvailability {
-                                NavigationLink(destination: ReaderView(paperUrl: readUrl)) {
+                                NavigationLink(destination: ReaderView(paperUrl: readUrl, paperTitle: paper.title)) {
                                     HStack {
                                         Text("Read Paper")
                                             .fontWeight(.semibold)
