@@ -1,6 +1,35 @@
+# macOS
 .DS_Store
-*.html
-.build/
+
+# Xcode
+DerivedData/
 build/
+*.xcuserstate
+xcuserdata/
+*.xcworkspace/xcuserdata/
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+
+# Swift Package Manager / build output
+.build/
+
+# Local editor and generated tool state
+.vscode/
 temp/
-.vscode
+buildServer.json
+
+# Generated/local reference files
+*.html
+PaperScope/MainLogo Exports/
+
+# Signing, archives, and private config
+*.ipa
+*.dSYM
+*.mobileprovision
+*.p12
+*.cer
+.env
+GoogleService-Info.plist
+Secrets.plist
+APIKeys.swift
