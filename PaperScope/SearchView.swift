@@ -175,7 +175,7 @@ struct SearchView: View {
                             .frame(maxWidth: .infinity, minHeight: 360)
                     } else if let error = viewModel.errorMessage {
                         errorState(error)
-                    } else if viewModel.papers.isEmpty && !viewModel.searchText.isEmpty {
+                    } else if viewModel.shouldShowNoResults {
                         noResultsState
                     } else {
                         paperResults
@@ -265,6 +265,12 @@ struct SearchView: View {
         guard canSubmitSearch else {
             focusSearchField()
             return
+        }
+
+        if showFilters {
+            withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) {
+                showFilters = false
+            }
         }
 
         Task {

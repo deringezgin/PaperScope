@@ -32,6 +32,7 @@ class SearchViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var isLoadingMore: Bool = false
     @Published private(set) var hasMoreResults: Bool = true
+    @Published private(set) var completedSearchQuery: String?
     @Published var errorMessage: String?
     
     @Published var showAdvanced: Bool = false
@@ -44,6 +45,12 @@ class SearchViewModel: ObservableObject {
 
     private var canRequestMore: Bool {
         !isLoading && !isLoadingMore && hasMoreResults && !lastQuery.isEmpty
+    }
+
+    var shouldShowNoResults: Bool {
+        let trimmedText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedText.isEmpty, !isLoading, errorMessage == nil else { return false }
+        return completedSearchQuery == makeQuery(for: trimmedText) && papers.isEmpty
     }
     
     func performSearch(reset: Bool = true) async {
@@ -58,6 +65,7 @@ class SearchViewModel: ObservableObject {
                 currentStart = 0
                 lastQuery = ""
                 hasMoreResults = false
+                completedSearchQuery = nil
             }
             return
         }
@@ -75,6 +83,7 @@ class SearchViewModel: ObservableObject {
             currentStart = 0
             hasMoreResults = true
             lastQuery = finalQuery
+            completedSearchQuery = nil
         } else {
             guard canRequestMore else { return }
             guard finalQuery == lastQuery else {
@@ -103,6 +112,9 @@ class SearchViewModel: ObservableObject {
             }
             currentStart += results.count
             hasMoreResults = results.count == pageSize
+            if reset {
+                completedSearchQuery = finalQuery
+            }
         } catch {
             guard requestID == activeRequestID else { return }
             self.errorMessage = error.localizedDescription
@@ -145,5 +157,6 @@ class SearchViewModel: ObservableObject {
         currentStart = 0
         lastQuery = ""
         hasMoreResults = false
+        completedSearchQuery = nil
     }
 }
