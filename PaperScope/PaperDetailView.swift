@@ -3,7 +3,7 @@ import SwiftUI
 struct PaperDetailView: View {
     let paper: Paper
     @EnvironmentObject var navState: NavigationState
-    @State private var availableHtmlUrl: URL?
+    @State private var htmlAvailability: HtmlAvailability = .checking
     
     private var candidateHtmlUrl: URL? {
         guard
@@ -56,36 +56,44 @@ struct PaperDetailView: View {
                     .lineSpacing(6)
                 
                 if let url = paper.linkURL {
-                    HStack(spacing: 12) {
-                        Link(destination: url) {
-                            HStack {
-                                Text("View in arXiv")
-                                    .fontWeight(.semibold)
-                                Image(systemName: "arrow.up.right.square")
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue.opacity(0.1))
-                            .foregroundColor(.blue)
-                            .cornerRadius(12)
-                        }
-
-                        if let readUrl = availableHtmlUrl {
-                            NavigationLink(destination: ReaderView(paperUrl: readUrl)) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack(spacing: 12) {
+                            Link(destination: url) {
                                 HStack {
-                                    Text("Read Paper")
+                                    Text("View in arXiv")
                                         .fontWeight(.semibold)
-                                    Image(systemName: "doc.text.viewfinder")
+                                    Image(systemName: "arrow.up.right.square")
                                 }
                                 .frame(maxWidth: .infinity)
                                 .padding()
-                                .background(Color.blue)
-                                .foregroundColor(.white)
+                                .background(Color.blue.opacity(0.1))
+                                .foregroundColor(.blue)
                                 .cornerRadius(12)
                             }
+
+                            if case .available(let readUrl) = htmlAvailability {
+                                NavigationLink(destination: ReaderView(paperUrl: readUrl)) {
+                                    HStack {
+                                        Text("Read Paper")
+                                            .fontWeight(.semibold)
+                                        Image(systemName: "doc.text.viewfinder")
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.blue)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(12)
+                                }
+                            }
+                        }
+
+                        if case .unavailable = htmlAvailability {
+                            Text("Online Reader not available for this paper.")
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
+                                .padding(.leading, 4)
                         }
                     }
-
                 }
 
             }
@@ -106,14 +114,17 @@ struct PaperDetailView: View {
     }
     
     private func verifyHtmlAvailability() async {
-        availableHtmlUrl = nil
+        htmlAvailability = .checking
 
         guard let candidateHtmlUrl else {
+            htmlAvailability = .unavailable
             return
         }
 
         if await isHtmlAvailable(at: candidateHtmlUrl) {
-            availableHtmlUrl = candidateHtmlUrl
+            htmlAvailability = .available(candidateHtmlUrl)
+        } else {
+            htmlAvailability = .unavailable
         }
     }
 
@@ -145,6 +156,12 @@ struct PaperDetailView: View {
         }
     }
 
+}
+
+private enum HtmlAvailability {
+    case checking
+    case available(URL)
+    case unavailable
 }
 
 #Preview {

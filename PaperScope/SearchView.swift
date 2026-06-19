@@ -53,10 +53,6 @@ struct SearchView: View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
                 HStack(spacing: 12) {
-                    Image(systemName: "magnifyingglass")
-                        .font(.system(size: 22, weight: .medium))
-                        .foregroundColor(.secondary)
-
                     TextField(searchPrompt, text: $viewModel.searchText)
                         .focused($isSearchFieldFocused)
                         .submitLabel(.search)
@@ -79,6 +75,25 @@ struct SearchView: View {
                         .buttonStyle(.plain)
                         .accessibilityLabel("Clear search")
                     }
+
+                    Button(action: performSearch) {
+                        Group {
+                            if viewModel.isLoading {
+                                ProgressView()
+                                    .tint(.white)
+                            } else {
+                                Image(systemName: "magnifyingglass")
+                                    .font(.system(size: 15, weight: .semibold))
+                            }
+                        }
+                        .foregroundColor(searchActionForegroundColor)
+                        .frame(width: 34, height: 34)
+                        .background(searchActionBackgroundColor)
+                        .clipShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(viewModel.isLoading)
+                    .accessibilityLabel("Search")
                 }
                 .padding(.horizontal, 16)
                 .frame(height: 54)
@@ -259,6 +274,14 @@ struct SearchView: View {
 
     private var searchPrompt: String {
         "Search \(viewModel.selectedField.rawValue.lowercased())"
+    }
+
+    private var searchActionBackgroundColor: Color {
+        canSubmitSearch ? .blue : Color.gray.opacity(0.22)
+    }
+
+    private var searchActionForegroundColor: Color {
+        canSubmitSearch ? .white : .secondary
     }
 
     private func performSearch() {
