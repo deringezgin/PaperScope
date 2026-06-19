@@ -3,211 +3,19 @@ import SwiftUI
 struct SearchView: View {
     @StateObject private var viewModel = SearchViewModel()
     @EnvironmentObject var navState: NavigationState
+    @Environment(\.colorScheme) private var colorScheme
+    @FocusState private var isSearchFieldFocused: Bool
     
     @State private var showFilters = false
     @State private var path = NavigationPath()
-    @FocusState private var isSearchFocused: Bool
+    @State private var searchFocusRequest = UUID()
 
     var body: some View {
         NavigationStack(path: $path) {
-            VStack(spacing: 0) {
-                VStack(spacing: 12) {
-                    HStack(spacing: 12) {
-                        HStack(spacing: 8) {
-                            TextField("Search in \(viewModel.selectedField.rawValue)...", text: $viewModel.searchText)
-                                .textFieldStyle(.plain)
-                                .submitLabel(.search)
-                                .focused($isSearchFocused)
-                                .padding(.leading, 8)
-                                .onSubmit {
-                                    performSearch()
-                                }
-                            
-                            Spacer()
-
-                            Button(action: performSearch) {
-                                Image(systemName: viewModel.isLoading ? "hourglass" : "magnifyingglass")
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .foregroundColor(searchButtonColor)
-                                    .frame(width: 32, height: 32)
-                                    .contentShape(Circle())
-                            }
-                            .disabled(viewModel.isLoading)
-                            .accessibilityLabel("Search")
-                        }
-                        .padding(8)
-                        .background(.ultraThinMaterial)
-                        .clipShape(Capsule())
-                        .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
-                        
-                        Button(action: {
-                            withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
-                                showFilters.toggle()
-                            }
-                        }) {
-                            Image(systemName: "slider.horizontal.3")
-                                .font(.title3)
-                                .foregroundColor(showFilters ? .white : .primary)
-                                .padding(12)
-                                .background(showFilters ? Color.blue : Color.clear)
-                                .background(.ultraThinMaterial)
-                                .clipShape(Circle())
-                                .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
-                        }
-                    }
-                    .padding(.horizontal)
-                    .padding(.top, 8)
-                    
-                    if showFilters {
-                        VStack(spacing: 0) {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Field")
-                                    .font(.subheadline)
-                                    .padding(.horizontal)
-                                    .padding(.top, 12)
-                                
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack(spacing: 10) {
-                                        ForEach(SearchField.allCases) { field in
-                                            FilterChip(
-                                                title: field.rawValue,
-                                                isSelected: viewModel.selectedField == field,
-                                                action: {
-                                                    viewModel.selectedField = field
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
-                                .padding(.horizontal)
-                            }
-                            
-                            Divider()
-                                .padding(.vertical, 8)
-                                .padding(.horizontal)
-
-                             Toggle("Exact Match", isOn: $viewModel.isExactMatch)
-                                .font(.subheadline)
-                                .padding(.horizontal)
-                                .padding(.bottom, 8)
-                            
-                            Divider()
-                                .padding(.horizontal)
-                            
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Categories")
-                                    .font(.subheadline)
-                                    .padding(.horizontal)
-                                    .padding(.top, 8)
-                                    
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack(spacing: 10) {
-                                        ForEach(Taxonomy.mainCategories) { category in
-                                            FilterChip(
-                                                title: category.name,
-                                                isSelected: viewModel.selectedCategories.contains(category.id),
-                                                action: {
-                                                    if viewModel.selectedCategories.contains(category.id) {
-                                                        viewModel.selectedCategories.remove(category.id)
-                                                    } else {
-                                                        viewModel.selectedCategories.insert(category.id)
-                                                    }
-                                                }
-                                            )
-                                        }
-                                    }
-                                    .padding(.vertical, 12)
-                                }
-                                .padding(.horizontal)
-                            }
-                        }
-                        .background(.ultraThinMaterial)
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                        .padding(.horizontal)
-                        .padding(.bottom, 8)
-                        .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .topTrailing)))
-                    }
-                }
-                .padding(.bottom, 8)
-                
-                ZStack {
-                    if viewModel.isLoading {
-                        ProgressView()
-                            .scaleEffect(1.5)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    } else if let error = viewModel.errorMessage {
-                        VStack {
-                            Image(systemName: "exclamationmark.triangle")
-                                .font(.largeTitle)
-                                .foregroundColor(.orange)
-                            Text(error)
-                                .multilineTextAlignment(.center)
-                                .padding()
-                        }
-                        .foregroundColor(.secondary)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    } else if viewModel.papers.isEmpty && !viewModel.searchText.isEmpty {
-                        VStack {
-                            Image(systemName: "doc.text.magnifyingglass")
-                                .font(.largeTitle)
-                                .foregroundColor(.secondary)
-                            Text("No results found.")
-                                .foregroundColor(.secondary)
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    } else {
-                        ScrollView {
-                            LazyVStack(spacing: 16) {
-                                ForEach(viewModel.papers) { paper in
-                                    NavigationLink(value: paper) {
-                                        PaperCardView(paper: paper)
-                                    }
-                                    .buttonStyle(ScaleButtonStyle())
-                                }
-                                
-                                if !viewModel.papers.isEmpty && viewModel.hasMoreResults {
-                                    Button(action: {
-                                        Task { await viewModel.loadMore() }
-                                    }) {
-                                        if viewModel.isLoadingMore {
-                                            ProgressView()
-                                        } else {
-                                            Text("Load More")
-                                                .fontWeight(.semibold)
-                                        }
-                                    }
-                                    .padding()
-                                    .frame(maxWidth: .infinity)
-                                    .background(.ultraThinMaterial)
-                                    .cornerRadius(12)
-                                }
-                            }
-                            .padding()
-                        }
-                        .scrollDismissesKeyboard(.interactively)
-                    }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    hideKeyboard()
-                }
-                .overlay {
-                    if showFilters {
-                        Color.black.opacity(0.001)
-                            .onTapGesture {
-                                hideKeyboard()
-                                withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
-                                    showFilters = false
-                                }
-                            }
-                    }
-                }
-            }
-            .navigationTitle("Search")
-            .background {
-                AnimatedBackgroundView()
-            }
+            resultsContent
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.hidden, for: .navigationBar)
             .navigationDestination(for: Paper.self) { paper in
                 PaperDetailView(paper: paper)
             }
@@ -240,13 +48,217 @@ struct SearchView: View {
             }
         }
     }
-    
+
+    private var searchHeader: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 12) {
+                HStack(spacing: 12) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 22, weight: .medium))
+                        .foregroundColor(.secondary)
+
+                    TextField(searchPrompt, text: $viewModel.searchText)
+                        .focused($isSearchFieldFocused)
+                        .submitLabel(.search)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .font(.title3)
+                        .onSubmit {
+                            performSearch()
+                        }
+
+                    if !viewModel.searchText.isEmpty {
+                        Button {
+                            viewModel.clearSearch()
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 20, weight: .semibold))
+                                .symbolRenderingMode(.hierarchical)
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Clear search")
+                    }
+                }
+                .padding(.horizontal, 16)
+                .frame(height: 54)
+                .background(controlBackgroundColor)
+                .clipShape(Capsule())
+                .overlay {
+                    Capsule()
+                        .stroke(Color.primary.opacity(0.08), lineWidth: 1)
+                }
+
+                Button {
+                    withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) {
+                        showFilters.toggle()
+                    }
+                } label: {
+                    Image(systemName: showFilters ? "slider.horizontal.3" : "line.3.horizontal.decrease")
+                        .font(.system(size: 21, weight: .semibold))
+                        .foregroundColor(showFilters ? .white : .primary)
+                        .frame(width: 54, height: 54)
+                        .background(showFilters ? Color.blue : controlBackgroundColor)
+                        .clipShape(Circle())
+                        .overlay {
+                            Circle()
+                                .stroke(Color.primary.opacity(showFilters ? 0 : 0.08), lineWidth: 1)
+                        }
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(showFilters ? "Hide filters" : "Show filters")
+            }
+
+            if showFilters {
+                filterPanel
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+    }
+
+    private var filterPanel: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(SearchField.allCases) { field in
+                        FilterChip(
+                            title: field.rawValue,
+                            isSelected: viewModel.selectedField == field,
+                            action: {
+                                viewModel.selectedField = field
+                            }
+                        )
+                    }
+                }
+                .padding(.horizontal, 12)
+            }
+
+            Toggle("Exact Match", isOn: $viewModel.isExactMatch)
+                .font(.subheadline)
+                .padding(.horizontal, 12)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(Taxonomy.mainCategories) { category in
+                        FilterChip(
+                            title: category.name,
+                            isSelected: viewModel.selectedCategories.contains(category.id),
+                            action: {
+                                toggleCategory(category.id)
+                            }
+                        )
+                    }
+                }
+                .padding(.horizontal, 12)
+            }
+        }
+        .padding(.vertical, 12)
+        .background(controlBackgroundColor)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .stroke(Color.primary.opacity(0.08), lineWidth: 1)
+        }
+    }
+
+    @ViewBuilder
+    private var resultsContent: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(spacing: 16) {
+                    searchHeader
+                        .id(SearchScrollTarget.header)
+
+                    if viewModel.isLoading {
+                        ProgressView()
+                            .scaleEffect(1.5)
+                            .frame(maxWidth: .infinity, minHeight: 360)
+                    } else if let error = viewModel.errorMessage {
+                        errorState(error)
+                    } else if viewModel.papers.isEmpty && !viewModel.searchText.isEmpty {
+                        noResultsState
+                    } else {
+                        paperResults
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+                .padding(.bottom, 24)
+            }
+            .background {
+                AnimatedBackgroundView()
+            }
+            .scrollDismissesKeyboard(.interactively)
+            .onChange(of: searchFocusRequest) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.88)) {
+                    proxy.scrollTo(SearchScrollTarget.header, anchor: .top)
+                }
+                isSearchFieldFocused = true
+            }
+        }
+    }
+
+    private func errorState(_ error: String) -> some View {
+        VStack(spacing: 12) {
+            Image(systemName: "exclamationmark.triangle")
+                .font(.largeTitle)
+                .foregroundColor(.orange)
+            Text(error)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+        }
+        .foregroundColor(.secondary)
+        .frame(maxWidth: .infinity, minHeight: 360)
+    }
+
+    private var noResultsState: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "doc.text.magnifyingglass")
+                .font(.largeTitle)
+                .foregroundColor(.secondary)
+            Text("No results found.")
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, minHeight: 360)
+    }
+
+    @ViewBuilder
+    private var paperResults: some View {
+        ForEach(viewModel.papers) { paper in
+            NavigationLink(value: paper) {
+                PaperCardView(paper: paper)
+            }
+            .buttonStyle(ScaleButtonStyle())
+        }
+
+        if !viewModel.papers.isEmpty && viewModel.hasMoreResults {
+            Button(action: {
+                Task { await viewModel.loadMore() }
+            }) {
+                if viewModel.isLoadingMore {
+                    ProgressView()
+                } else {
+                    Text("Load More")
+                        .fontWeight(.semibold)
+                }
+            }
+            .padding()
+            .frame(maxWidth: .infinity)
+            .background(controlBackgroundColor)
+            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        }
+    }
+
     private var canSubmitSearch: Bool {
         !viewModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
-    private var searchButtonColor: Color {
-        canSubmitSearch && !viewModel.isLoading ? .blue : .secondary
+    private var controlBackgroundColor: Color {
+        colorScheme == .dark ? Color.white.opacity(0.08) : Color.white.opacity(0.72)
+    }
+
+    private var searchPrompt: String {
+        "Search \(viewModel.selectedField.rawValue.lowercased())"
     }
 
     private func performSearch() {
@@ -263,15 +275,20 @@ struct SearchView: View {
     private func focusSearchField() {
         path = NavigationPath()
         showFilters = false
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            isSearchFocused = true
-        }
+        searchFocusRequest = UUID()
     }
 
-    private func hideKeyboard() {
-        isSearchFocused = false
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    private func toggleCategory(_ id: String) {
+        if viewModel.selectedCategories.contains(id) {
+            viewModel.selectedCategories.remove(id)
+        } else {
+            viewModel.selectedCategories.insert(id)
+        }
     }
+}
+
+private enum SearchScrollTarget {
+    static let header = "search-header"
 }
 
 struct FilterChip: View {

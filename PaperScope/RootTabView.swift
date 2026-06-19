@@ -10,10 +10,12 @@ struct RootTabView: View {
                 if newTab == navState.selectedTab && newTab == 0 {
                     navState.refreshRecent()
                 }
-                if newTab == navState.selectedTab && newTab == 2 {
-                    navState.focusSearch()
-                }
                 navState.selectedTab = newTab
+                if newTab == 2 {
+                    DispatchQueue.main.async {
+                        navState.focusSearch()
+                    }
+                }
             }
         )) {
             Tab("Home", systemImage: "house", value: 0) {
@@ -24,10 +26,11 @@ struct RootTabView: View {
                 ListsView()
             }
             
-            Tab(value: 2, role: .search) {
+            Tab("Search", systemImage: "magnifyingglass", value: 2) {
                 SearchView()
             }
         }
+        .tabBarMinimizeBehavior(.onScrollDown)
     }
 }
 

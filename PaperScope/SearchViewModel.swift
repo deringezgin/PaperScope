@@ -134,4 +134,16 @@ class SearchViewModel: ObservableObject {
         guard canRequestMore else { return }
         await performSearch(reset: false)
     }
+
+    func clearSearch() {
+        activeRequestID = UUID()
+        searchText = ""
+        papers = []
+        errorMessage = nil
+        isLoading = false
+        isLoadingMore = false
+        currentStart = 0
+        lastQuery = ""
+        hasMoreResults = false
+    }
 }
