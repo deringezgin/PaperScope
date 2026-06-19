@@ -19,7 +19,7 @@ class NavigationState: ObservableObject {
     
     func search(for term: String, field: SearchField, exact: Bool = false) {
         pendingSearch = SearchRequest(term: term, field: field, exact: exact)
-        selectedTab = 2
+        selectedTab = 1
     }
 
     func focusSearch() {

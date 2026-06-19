@@ -11,7 +11,7 @@ struct RootTabView: View {
                     navState.refreshRecent()
                 }
                 navState.selectedTab = newTab
-                if newTab == 2 {
+                if newTab == 1 {
                     DispatchQueue.main.async {
                         navState.focusSearch()
                     }
@@ -22,11 +22,7 @@ struct RootTabView: View {
                 RecentView()
             }
             
-            Tab("Lists", systemImage: "list.bullet.rectangle", value: 1) {
-                ListsView()
-            }
-            
-            Tab("Search", systemImage: "magnifyingglass", value: 2) {
+            Tab("Search", systemImage: "magnifyingglass", value: 1) {
                 SearchView()
             }
         }
