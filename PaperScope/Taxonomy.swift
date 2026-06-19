@@ -25,7 +25,6 @@ struct Taxonomy {
             let content = try String(contentsOf: url, encoding: .utf8)
             var rows = content.components(separatedBy: "\n")
             
-            // Remove header if present
             if let header = rows.first, header.contains("main_id") {
                 rows.removeFirst()
             }
@@ -33,17 +32,14 @@ struct Taxonomy {
             var categoryMap: [String: (name: String, subs: [TaxonomySubcategory])] = [:]
             
             for row in rows {
-                // let columns = row.components(separatedBy: ",") // Naive split fails on quotes
                 let columns = parseCSVRow(row)
                 
                 if columns.count >= 5 {
-                    let mainId = columns[0].trimmingCharacters(in: .whitespaces)
-                    let mainName = columns[1].trimmingCharacters(in: .whitespaces)
-                    // let subId = columns[2]
-                    // Clean quotes from the name if present
-                    let rawSubName = columns[3].trimmingCharacters(in: .whitespaces)
+                    let mainId = columns[0].trimmingCharacters(in: .whitespacesAndNewlines)
+                    let mainName = columns[1].trimmingCharacters(in: .whitespacesAndNewlines)
+                    let rawSubName = columns[3].trimmingCharacters(in: .whitespacesAndNewlines)
                     let subName = rawSubName.trimmingCharacters(in: CharacterSet(charactersIn: "\""))
-                    let subCode = columns[4].trimmingCharacters(in: .whitespaces)
+                    let subCode = columns[4].trimmingCharacters(in: .whitespacesAndNewlines)
                     
                     if mainId.isEmpty { continue }
                     

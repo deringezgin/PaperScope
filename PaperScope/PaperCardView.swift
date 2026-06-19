@@ -23,7 +23,6 @@ struct PaperCardView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background {
             ZStack {
-                // Liquid glass effect: Ultra thin material + white tint + border
                 RoundedRectangle(cornerRadius: 20)
                     .fill(.ultraThinMaterial)
                 RoundedRectangle(cornerRadius: 20)

@@ -7,7 +7,6 @@ enum SearchField: String, CaseIterable, Identifiable {
     case author = "Author"
     case abstract = "Abstract"
     case journalRef = "Journal Ref"
-    // case acmClass = "ACM Class" // Can add more if needed
     
     var id: String { rawValue }
     
@@ -32,33 +31,86 @@ class SearchViewModel: ObservableObject {
     @Published var papers: [Paper] = []
     @Published var isLoading: Bool = false
     @Published var isLoadingMore: Bool = false
+    @Published private(set) var hasMoreResults: Bool = true
     @Published var errorMessage: String?
     
-    // Advanced Search Toggles
     @Published var showAdvanced: Bool = false
     
     private let api = ArxivAPI()
     private var currentStart: Int = 0
     private let pageSize: Int = 20
-    private var lastQuery: String = "" // Store last query for pagination
+    private var lastQuery: String = ""
+    private var activeRequestID = UUID()
+
+    private var canRequestMore: Bool {
+        !isLoading && !isLoadingMore && hasMoreResults && !lastQuery.isEmpty
+    }
     
     func performSearch(reset: Bool = true) async {
-        let trimmedText = searchText.trimmingCharacters(in: .whitespaces)
-        guard !trimmedText.isEmpty else { return }
+        let trimmedText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedText.isEmpty else {
+            if reset {
+                activeRequestID = UUID()
+                papers = []
+                errorMessage = nil
+                isLoading = false
+                isLoadingMore = false
+                currentStart = 0
+                lastQuery = ""
+                hasMoreResults = false
+            }
+            return
+        }
+        
+        let finalQuery = makeQuery(for: trimmedText)
+        let requestID: UUID
         
         if reset {
+            activeRequestID = UUID()
+            requestID = activeRequestID
             isLoading = true
+            isLoadingMore = false
             errorMessage = nil
             papers = []
             currentStart = 0
+            hasMoreResults = true
+            lastQuery = finalQuery
         } else {
+            guard canRequestMore else { return }
+            guard finalQuery == lastQuery else {
+                await performSearch(reset: true)
+                return
+            }
+            requestID = activeRequestID
             isLoadingMore = true
         }
+
+        defer {
+            if requestID == activeRequestID {
+                isLoading = false
+                isLoadingMore = false
+            }
+        }
         
-        // Construct Query
+        do {
+            let results = try await api.fetchRecentPapers(category: finalQuery, start: currentStart, maxResults: pageSize)
+            guard requestID == activeRequestID else { return }
+
+            if reset {
+                self.papers = results
+            } else {
+                self.papers.append(contentsOf: results)
+            }
+            currentStart += results.count
+            hasMoreResults = results.count == pageSize
+        } catch {
+            guard requestID == activeRequestID else { return }
+            self.errorMessage = error.localizedDescription
+        }
+    }
+
+    private func makeQuery(for trimmedText: String) -> String {
         var queryParts: [String] = []
-        
-        // 1. Text Search
         let textInternal = isExactMatch ? "\"\(trimmedText)\"" : trimmedText
         
         if let prefix = selectedField.prefix {
@@ -69,41 +121,17 @@ class SearchViewModel: ObservableObject {
              }
         }
         
-        // 2. Category Filter
         if !selectedCategories.isEmpty {
-            let catQueries = selectedCategories.map { "cat:\($0)*" } 
+            let catQueries = selectedCategories.sorted().map { "cat:\($0)*" }
             let catPart = "(" + catQueries.joined(separator: "+OR+") + ")"
             queryParts.append(catPart)
         }
         
-        // Combine with AND
-        let finalQuery = queryParts.joined(separator: "+AND+")
-        print("DEBUG: Executing Search Query (start: \(currentStart)): \(finalQuery)")
-        lastQuery = finalQuery
-        
-        do {
-            let results = try await api.fetchRecentPapers(category: finalQuery, start: currentStart, maxResults: pageSize)
-            if reset {
-                self.papers = results
-            } else {
-                self.papers.append(contentsOf: results)
-            }
-            // Increment for next page
-            if !results.isEmpty {
-                currentStart += pageSize
-            }
-        } catch {
-            self.errorMessage = error.localizedDescription
-        }
-        
-        if reset {
-            isLoading = false
-        } else {
-            isLoadingMore = false
-        }
+        return queryParts.joined(separator: "+AND+")
     }
     
     func loadMore() async {
+        guard canRequestMore else { return }
         await performSearch(reset: false)
     }
 }

@@ -8,8 +8,10 @@ struct RootTabView: View {
             get: { navState.selectedTab },
             set: { newTab in
                 if newTab == navState.selectedTab && newTab == 0 {
-                    // Re-tap on Recent (0)
                     navState.refreshRecent()
+                }
+                if newTab == navState.selectedTab && newTab == 2 {
+                    navState.focusSearch()
                 }
                 navState.selectedTab = newTab
             }
@@ -26,15 +28,11 @@ struct RootTabView: View {
                 SearchView()
             }
         }
-        .tabBarMinimizeBehavior(.onScrollDown)
-        // Common background for the whole app can be placed here if tabs don't have their own backgrounds
-        .background(
-            LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.2), Color.purple.opacity(0.3), Color.black.opacity(0.8)]), startPoint: .topLeading, endPoint: .bottomTrailing)
-                .ignoresSafeArea()
-        )
     }
 }
 
 #Preview {
     RootTabView()
+        .environmentObject(AppSettings())
+        .environmentObject(NavigationState())
 }

@@ -53,7 +53,6 @@ struct CategorySelectionView: View {
                             
                             Spacer()
                             
-                            // Section Actions
                             Menu {
                                 Button("Select All") { selectAll(in: category) }
                                 Button("Deselect All") { deselectAll(in: category) }
@@ -81,14 +80,12 @@ struct CategorySelectionView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(settings.selectedCategories.isEmpty ? "Select All" : "Clear All") {
                     if settings.selectedCategories.isEmpty {
-                        // Select All
                         for category in Taxonomy.mainCategories {
                             for sub in category.subcategories {
                                 settings.selectedCategories.insert(sub.code)
                             }
                         }
                     } else {
-                        // Clear All
                         settings.selectedCategories.removeAll()
                     }
                 }

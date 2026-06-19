@@ -11,6 +11,7 @@ class NavigationState: ObservableObject {
     @Published var selectedTab: Int = 0
     @Published var pendingSearch: SearchRequest?
     @Published var refreshRecentParams: UUID = UUID()
+    @Published var searchFocusParams: UUID = UUID()
     
     func refreshRecent() {
         refreshRecentParams = UUID()
@@ -19,5 +20,9 @@ class NavigationState: ObservableObject {
     func search(for term: String, field: SearchField, exact: Bool = false) {
         pendingSearch = SearchRequest(term: term, field: field, exact: exact)
         selectedTab = 2
+    }
+
+    func focusSearch() {
+        searchFocusParams = UUID()
     }
 }

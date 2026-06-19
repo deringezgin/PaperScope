@@ -9,10 +9,8 @@ struct SettingsView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
-                    // Title is now handled by navigationTitle
                     
                     VStack(spacing: 0) {
-                    // Category Selection
                         NavigationLink(destination: CategorySelectionView()) {
                             HStack {
                                 Text("Home Feed Categories")
@@ -31,7 +29,6 @@ struct SettingsView: View {
                         
                         Divider()
                         
-                        // Dark Mode Toggle
                         Toggle("Dark Mode", isOn: Binding(
                             get: { settings.isDarkMode },
                             set: { newValue in
@@ -50,7 +47,7 @@ struct SettingsView: View {
                     .background(.ultraThinMaterial)
                     .cornerRadius(15)
                     .padding(.horizontal)
-                    .padding(.top) // Add some top padding since we removed the manual title
+                    .padding(.top)
                 }
             }
             .background {
@@ -95,5 +92,6 @@ struct SettingsView: View {
         LinearGradient(colors: [.blue.opacity(0.3), .purple.opacity(0.3)], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea()
         SettingsView()
+            .environmentObject(AppSettings())
     }
 }

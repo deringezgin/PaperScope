@@ -23,9 +23,6 @@ struct ArxivAPI {
             throw ArxivAPIError.invalidURL
         }
         
-        // Add a small delay to respect rate limits if fetching rapidly (though relying on manual load more is likely safe)
-        // try await Task.sleep(nanoseconds: 500_000_000) // 0.5s delay if needed
-        
         let (data, _) = try await URLSession.shared.data(from: url)
         
         let parser = ArxivXMLParser(data: data)
@@ -33,13 +30,9 @@ struct ArxivAPI {
     }
 }
 
-// MARK: - XML Parser
-
 class ArxivXMLParser: NSObject, XMLParserDelegate {
     private let parser: XMLParser
     private var papers: [Paper] = []
-    
-    // Parsing state
     private var currentElement: String = ""
     private var currentTitle: String = ""
     private var currentSummary: String = ""
@@ -48,8 +41,6 @@ class ArxivXMLParser: NSObject, XMLParserDelegate {
     private var currentAuthors: [String] = []
     private var currentEntryLink: String?
     private var currentPrimaryCategory: String?
-    
-    // Helper to capture text content
     private var currentTextBuffer: String = ""
     
     init(data: Data) {
@@ -69,14 +60,11 @@ class ArxivXMLParser: NSObject, XMLParserDelegate {
         }
     }
     
-    // MARK: - Delegate Methods
-    
     func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [:]) {
         currentElement = elementName
-        currentTextBuffer = "" // Reset buffer for new element
+        currentTextBuffer = ""
         
         if elementName == "entry" {
-            // Reset entry-specific properties
             currentTitle = ""
             currentSummary = ""
             currentId = ""
@@ -87,7 +75,6 @@ class ArxivXMLParser: NSObject, XMLParserDelegate {
         }
         
         if elementName == "link", let rel = attributeDict["rel"], rel == "alternate", let href = attributeDict["href"] {
-            // Often inside <entry>, this is the link to the abstract
             currentEntryLink = href
         }
         
@@ -105,8 +92,6 @@ class ArxivXMLParser: NSObject, XMLParserDelegate {
         
         switch elementName {
         case "id":
-            // arXiv IDs often look like http://arxiv.org/abs/2101.00001
-            // We usually just want the ID part, but keeping the URL string is fine for uniqueness
             currentId = trimmedText
         case "title":
             currentTitle = trimmedText.replacingOccurrences(of: "\n", with: " ")
@@ -115,15 +100,10 @@ class ArxivXMLParser: NSObject, XMLParserDelegate {
         case "published":
             currentPublished = trimmedText
         case "name":
-            // This is inside <author><name>...</name></author>
-            // We assume <name> is a direct child of <author> which is inside <entry> (mostly true for Atom)
-            // But strict state machine check would be better if structure was complex.
-            // For now, simpler is fine.
             if !trimmedText.isEmpty {
                 currentAuthors.append(trimmedText)
             }
         case "entry":
-            // Finished an entry, create Paper
             let paper = Paper(
                 id: currentId,
                 title: currentTitle,

@@ -6,32 +6,40 @@ struct SearchView: View {
     
     @State private var showFilters = false
     @State private var path = NavigationPath()
+    @FocusState private var isSearchFocused: Bool
 
     var body: some View {
         NavigationStack(path: $path) {
             VStack(spacing: 0) {
-                // Search Bar Area
                 VStack(spacing: 12) {
                     HStack(spacing: 12) {
-                        // Glassy Search Capsule
                         HStack(spacing: 8) {
-                            // Text Field
                             TextField("Search in \(viewModel.selectedField.rawValue)...", text: $viewModel.searchText)
                                 .textFieldStyle(.plain)
                                 .submitLabel(.search)
+                                .focused($isSearchFocused)
                                 .padding(.leading, 8)
                                 .onSubmit {
-                                    Task { await viewModel.performSearch() }
+                                    performSearch()
                                 }
                             
                             Spacer()
+
+                            Button(action: performSearch) {
+                                Image(systemName: viewModel.isLoading ? "hourglass" : "magnifyingglass")
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundColor(searchButtonColor)
+                                    .frame(width: 32, height: 32)
+                                    .contentShape(Circle())
+                            }
+                            .disabled(viewModel.isLoading)
+                            .accessibilityLabel("Search")
                         }
                         .padding(8)
                         .background(.ultraThinMaterial)
                         .clipShape(Capsule())
                         .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
                         
-                        // Adjustment Button
                         Button(action: {
                             withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
                                 showFilters.toggle()
@@ -52,7 +60,6 @@ struct SearchView: View {
                     
                     if showFilters {
                         VStack(spacing: 0) {
-                            // Field Selection
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Field")
                                     .font(.subheadline)
@@ -87,7 +94,6 @@ struct SearchView: View {
                             Divider()
                                 .padding(.horizontal)
                             
-                            // Taxonomy Filters (Categories)
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Categories")
                                     .font(.subheadline)
@@ -122,9 +128,8 @@ struct SearchView: View {
                         .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .topTrailing)))
                     }
                 }
-                .padding(.bottom, 8) // Spacing before results
+                .padding(.bottom, 8)
                 
-                // Results Area
                 ZStack {
                     if viewModel.isLoading {
                         ProgressView()
@@ -160,7 +165,7 @@ struct SearchView: View {
                                     .buttonStyle(ScaleButtonStyle())
                                 }
                                 
-                                if !viewModel.papers.isEmpty {
+                                if !viewModel.papers.isEmpty && viewModel.hasMoreResults {
                                     Button(action: {
                                         Task { await viewModel.loadMore() }
                                     }) {
@@ -175,8 +180,6 @@ struct SearchView: View {
                                     .frame(maxWidth: .infinity)
                                     .background(.ultraThinMaterial)
                                     .cornerRadius(12)
-                                    .background(.ultraThinMaterial)
-                                    .cornerRadius(12)
                                 }
                             }
                             .padding()
@@ -185,7 +188,7 @@ struct SearchView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .contentShape(Rectangle()) // Ensure empty areas are tappable
+                .contentShape(Rectangle())
                 .onTapGesture {
                     hideKeyboard()
                 }
@@ -221,6 +224,9 @@ struct SearchView: View {
                 }
             }
         }
+        .onChange(of: navState.searchFocusParams) {
+            focusSearchField()
+        }
         .onChange(of: navState.pendingSearch) { _, request in
             if let request = request {
                 path = NavigationPath()
@@ -235,7 +241,35 @@ struct SearchView: View {
         }
     }
     
+    private var canSubmitSearch: Bool {
+        !viewModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private var searchButtonColor: Color {
+        canSubmitSearch && !viewModel.isLoading ? .blue : .secondary
+    }
+
+    private func performSearch() {
+        guard canSubmitSearch else {
+            focusSearchField()
+            return
+        }
+
+        Task {
+            await viewModel.performSearch()
+        }
+    }
+
+    private func focusSearchField() {
+        path = NavigationPath()
+        showFilters = false
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            isSearchFocused = true
+        }
+    }
+
     private func hideKeyboard() {
+        isSearchFocused = false
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
@@ -261,4 +295,5 @@ struct FilterChip: View {
 
 #Preview {
     SearchView()
+        .environmentObject(NavigationState())
 }

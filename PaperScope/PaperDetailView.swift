@@ -3,14 +3,22 @@ import SwiftUI
 struct PaperDetailView: View {
     let paper: Paper
     @EnvironmentObject var navState: NavigationState
+    @State private var availableHtmlUrl: URL?
     
-    // Helper to constructing HTML URL from abstract URL
-    private var htmlUrl: URL? {
-        guard let absString = paper.linkURL?.absoluteString else { return nil }
-        // Simple replacement of /abs/ with /html/
-        // E.g. https://arxiv.org/abs/2509.13656v1 -> https://arxiv.org/html/2509.13656v1
-        let htmlString = absString.replacingOccurrences(of: "/abs/", with: "/html/")
-        return URL(string: htmlString)
+    private var candidateHtmlUrl: URL? {
+        guard
+            let url = paper.linkURL,
+            url.host?.lowercased().hasSuffix("arxiv.org") == true,
+            url.path.hasPrefix("/abs/"),
+            var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        else {
+            return nil
+        }
+
+        components.path = url.path.replacingOccurrences(of: "/abs/", with: "/html/")
+        components.query = nil
+        components.fragment = nil
+        return components.url
     }
 
     var body: some View {
@@ -33,7 +41,6 @@ struct PaperDetailView: View {
                     .font(.headline)
                     .foregroundColor(.secondary)
 
-                // Divider removed as per request
                 Text("Added on: \(paper.published.formatted(date: .long, time: .omitted))")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
@@ -50,7 +57,6 @@ struct PaperDetailView: View {
                 
                 if let url = paper.linkURL {
                     HStack(spacing: 12) {
-                        // Original "View in arXiv"
                         Link(destination: url) {
                             HStack {
                                 Text("View in arXiv")
@@ -64,8 +70,7 @@ struct PaperDetailView: View {
                             .cornerRadius(12)
                         }
 
-                        // New "Read Paper" button
-                        if let readUrl = htmlUrl {
+                        if let readUrl = availableHtmlUrl {
                             NavigationLink(destination: ReaderView(paperUrl: readUrl)) {
                                 HStack {
                                     Text("Read Paper")
@@ -91,19 +96,61 @@ struct PaperDetailView: View {
             .padding()
         }
         .background {
-            // Placeholder gradient background for when viewed in isolation or navigation
             LinearGradient(colors: [.blue.opacity(0.2), .purple.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing)
                 .ignoresSafeArea()
         }
         .navigationBarTitleDisplayMode(.inline)
+        .task(id: paper.id) {
+            await verifyHtmlAvailability()
+        }
     }
     
+    private func verifyHtmlAvailability() async {
+        availableHtmlUrl = nil
+
+        guard let candidateHtmlUrl else {
+            return
+        }
+
+        if await isHtmlAvailable(at: candidateHtmlUrl) {
+            availableHtmlUrl = candidateHtmlUrl
+        }
+    }
+
+    private func isHtmlAvailable(at url: URL) async -> Bool {
+        if let headStatus = await statusCode(for: url, method: "HEAD"), headStatus != 405 {
+            return (200..<300).contains(headStatus)
+        }
+
+        guard let getStatus = await statusCode(for: url, method: "GET") else {
+            return false
+        }
+        return (200..<300).contains(getStatus)
+    }
+
+    private func statusCode(for url: URL, method: String) async -> Int? {
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.timeoutInterval = 8
+
+        if method == "GET" {
+            request.setValue("bytes=0-0", forHTTPHeaderField: "Range")
+        }
+
+        do {
+            let (_, response) = try await URLSession.shared.data(for: request)
+            return (response as? HTTPURLResponse)?.statusCode
+        } catch {
+            return nil
+        }
+    }
 
 }
 
 #Preview {
     NavigationView {
         PaperDetailView(paper: MockData.papers[0])
+            .environmentObject(NavigationState())
     }
 }
 
@@ -136,7 +183,6 @@ struct AuthorsFlowLayout: Layout {
         for subview in subviews {
             let size = subview.sizeThatFits(.unspecified)
             if currentX + size.width > maxWidth && !currentRowItems.isEmpty {
-                // New row
                 rows.append(Row(items: currentRowItems, y: currentY, maxY: CGSize(width: maxWidth, height: currentY + rowHeight)))
                 currentX = 0
                 currentY += rowHeight + spacing

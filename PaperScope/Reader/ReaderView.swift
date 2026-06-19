@@ -132,6 +132,39 @@ struct WebView: UIViewRepresentable {
             // 3. Append the new clean content
             document.body.appendChild(newContent);
             
+            // 4. Create fullscreen image overlay
+            const overlay = document.createElement('div');
+            overlay.id = 'fullscreen-overlay';
+            overlay.innerHTML = '<img id="fullscreen-img" src="" alt=""><div class="close-hint">Tap to close</div>';
+            document.body.appendChild(overlay);
+            
+            // 5. Add click handlers to all images
+            document.querySelectorAll('.reconstructed-paper img').forEach(img => {
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const fullImg = document.getElementById('fullscreen-img');
+                    fullImg.src = this.src;
+                    overlay.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
+            });
+            
+            // 6. Close overlay on click
+            overlay.addEventListener('click', function() {
+                this.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+            
+            // 7. Close on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && overlay.classList.contains('active')) {
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+            
             // 4. Inject Custom Styling for the Reconstructed View
             const style = document.createElement('style');
             style.innerHTML = `
@@ -183,6 +216,44 @@ struct WebView: UIViewRepresentable {
                 height: auto !important;
                 border-radius: 8px;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            }
+            
+            /* Fullscreen Image Overlay */
+            #fullscreen-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.95);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 0.3s ease, visibility 0.3s ease;
+                cursor: zoom-out;
+            }
+            
+            #fullscreen-overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+            
+            #fullscreen-img {
+                max-width: 95%;
+                max-height: 85%;
+                object-fit: contain;
+                border-radius: 8px;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            }
+            
+            .close-hint {
+                color: rgba(255, 255, 255, 0.7);
+                font-size: 14px;
+                margin-top: 16px;
             }
             
             /* Clean up Math */

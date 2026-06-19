@@ -18,7 +18,7 @@ struct RecentView: View {
                     if viewModel.isLoading {
                         ProgressView()
                             .padding()
-                    } else if !viewModel.papers.isEmpty {
+                    } else if !viewModel.papers.isEmpty && viewModel.hasMoreResults {
                         loadMoreButton
                     }
                 }
@@ -49,7 +49,6 @@ struct RecentView: View {
             .navigationDestination(for: Paper.self) { paper in
                 PaperDetailView(paper: paper)
             }
-            // .refreshable removed as per user request to rely on auto-refresh/tap
         }
         .onAppear {
             if viewModel.papers.isEmpty {
@@ -75,7 +74,6 @@ struct RecentView: View {
         ForEach(viewModel.papers) { paper in
             NavigationLink(value: paper) {
                 PaperCardView(paper: paper)
-                // .matchedGeometryEffect(id: paper.id, in: animationNamespace)
             }
             .buttonStyle(ScaleButtonStyle())
         }
@@ -136,4 +134,5 @@ struct ScaleButtonStyle: ButtonStyle {
 #Preview {
     RecentView()
         .environmentObject(AppSettings())
+        .environmentObject(NavigationState())
 }

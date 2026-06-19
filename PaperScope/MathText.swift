@@ -14,11 +14,10 @@ struct MathText: View {
         LaTeX(cleanText(text))
             .font(font)
             .parsingMode(.onlyEquations)
-            .renderingStyle(.original) // Render text first to avoid 0-height errors during transitions
+            .renderingStyle(.original)
     }
     
     private func cleanText(_ input: String) -> String {
-        // Normalize newlines to spaces for cleaner list rendering
         return input.replacingOccurrences(of: "\n", with: " ")
     }
 }

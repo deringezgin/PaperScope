@@ -9,7 +9,6 @@ struct Paper: Identifiable, Hashable {
     let linkURL: URL?
     let primaryCategory: String?
     
-    // Computed property for easy UI display of authors
     var authorsDisplay: String {
         authors.joined(separator: ", ")
     }
