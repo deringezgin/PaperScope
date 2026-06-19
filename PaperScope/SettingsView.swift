@@ -38,11 +38,6 @@ struct SettingsView: View {
                             }
                         ))
                         .padding()
-                        
-                        Divider()
-                        settingsRow(title: "Font Size", detail: "Coming Soon")
-                        Divider()
-                        settingsRow(title: "Account", detail: "Guest")
                     }
                     .background(.ultraThinMaterial)
                     .cornerRadius(15)
@@ -72,18 +67,6 @@ struct SettingsView: View {
             }
             .preferredColorScheme(settings.isDarkMode ? .dark : .light)
         }
-    }
-
-
-
-    private func settingsRow(title: String, detail: String) -> some View {
-        HStack {
-            Text(title)
-            Spacer()
-            Text(detail)
-                .foregroundColor(.secondary)
-        }
-        .padding()
     }
 }
 

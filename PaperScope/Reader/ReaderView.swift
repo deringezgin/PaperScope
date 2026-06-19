@@ -2,49 +2,29 @@ import SwiftUI
 import WebKit
 import UIKit
 
-// MARK: - Reader Theme
+// MARK: - Reader Palette
 
-enum ReaderTheme: String, CaseIterable, Identifiable {
-    case system
+enum ReaderPalette {
     case light
-    case sepia
     case dark
 
-    var id: String { rawValue }
-
-    var label: String {
-        switch self {
-        case .system: return "System"
-        case .light:  return "Light"
-        case .sepia:  return "Sepia"
-        case .dark:   return "Dark"
-        }
-    }
-
-    var icon: String {
-        switch self {
-        case .system: return "circle.lefthalf.filled"
-        case .light:  return "sun.max"
-        case .sepia:  return "book"
-        case .dark:   return "moon"
-        }
-    }
-
-    /// Resolves `.system` to a concrete theme using the current color scheme.
-    func resolved(for scheme: ColorScheme) -> ReaderTheme {
-        guard self == .system else { return self }
-        return scheme == .dark ? .dark : .light
+    init(colorScheme: ColorScheme) {
+        self = colorScheme == .dark ? .dark : .light
     }
 
     /// The `data-theme` attribute value used by the injected CSS.
-    var cssAttribute: String { self == .system ? "light" : rawValue }
+    var cssAttribute: String {
+        switch self {
+        case .light: return "light"
+        case .dark: return "dark"
+        }
+    }
 
     /// Background color used for the web view itself, to avoid white flashes.
     var backgroundColor: UIColor {
         switch self {
-        case .light, .system: return UIColor(red: 1, green: 1, blue: 1, alpha: 1)
-        case .sepia:          return UIColor(red: 0.965, green: 0.925, blue: 0.851, alpha: 1)
-        case .dark:           return UIColor(red: 0.059, green: 0.067, blue: 0.082, alpha: 1)
+        case .light: return UIColor(red: 1, green: 1, blue: 1, alpha: 1)
+        case .dark:  return UIColor(red: 0.059, green: 0.067, blue: 0.082, alpha: 1)
         }
     }
 }
@@ -57,28 +37,23 @@ struct ReaderView: View {
 
     @Environment(\.colorScheme) private var colorScheme
     @AppStorage("readerFontScale") private var fontScale: Double = 1.0
-    @AppStorage("readerTheme") private var themeRaw: String = ReaderTheme.system.rawValue
 
     @State private var isLoading = true
     @State private var progress: Double = 0
     @State private var zoomedImageURL: URL?
 
-    private var theme: ReaderTheme {
-        ReaderTheme(rawValue: themeRaw) ?? .system
-    }
-
-    private var resolvedTheme: ReaderTheme {
-        theme.resolved(for: colorScheme)
+    private var palette: ReaderPalette {
+        ReaderPalette(colorScheme: colorScheme)
     }
 
     var body: some View {
         ZStack(alignment: .top) {
-            resolvedTheme.swiftUIBackground.ignoresSafeArea()
+            palette.swiftUIBackground.ignoresSafeArea()
 
             if let url = paperUrl {
                 WebView(
                     url: url,
-                    theme: resolvedTheme,
+                    palette: palette,
                     fontScale: fontScale,
                     isLoading: $isLoading,
                     progress: $progress,
@@ -116,9 +91,7 @@ struct ReaderView: View {
         }
         .navigationTitle(paperTitle)
         .navigationBarTitleDisplayMode(.inline)
-        // Align the chrome (nav bar title, status bar) with the chosen reader
-        // theme so the title isn't, e.g., white text on a sepia page.
-        .preferredColorScheme(resolvedTheme == .dark ? .dark : .light)
+        .preferredColorScheme(palette == .dark ? .dark : .light)
         .toolbar(.hidden, for: .tabBar)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -147,19 +120,13 @@ struct ReaderView: View {
                 }
                 .disabled(fontScale >= 1.7)
             }
-
-            Picker("Theme", selection: $themeRaw) {
-                ForEach(ReaderTheme.allCases) { theme in
-                    Label(theme.label, systemImage: theme.icon).tag(theme.rawValue)
-                }
-            }
         } label: {
             Image(systemName: "textformat.size")
         }
     }
 }
 
-private extension ReaderTheme {
+private extension ReaderPalette {
     var swiftUIBackground: Color { Color(backgroundColor) }
 }
 
@@ -179,7 +146,7 @@ extension URL: @retroactive Identifiable {
 
 struct WebView: UIViewRepresentable {
     let url: URL
-    let theme: ReaderTheme
+    let palette: ReaderPalette
     let fontScale: Double
     @Binding var isLoading: Bool
     @Binding var progress: Double
@@ -199,21 +166,21 @@ struct WebView: UIViewRepresentable {
         webView.navigationDelegate = context.coordinator
         webView.scrollView.showsHorizontalScrollIndicator = false
         webView.isOpaque = false
-        webView.backgroundColor = theme.backgroundColor
-        webView.scrollView.backgroundColor = theme.backgroundColor
+        webView.backgroundColor = palette.backgroundColor
+        webView.scrollView.backgroundColor = palette.backgroundColor
         webView.load(URLRequest(url: url))
         return webView
     }
 
     func updateUIView(_ webView: WKWebView, context: Context) {
         context.coordinator.parent = self
-        webView.backgroundColor = theme.backgroundColor
-        webView.scrollView.backgroundColor = theme.backgroundColor
+        webView.backgroundColor = palette.backgroundColor
+        webView.scrollView.backgroundColor = palette.backgroundColor
 
-        // Apply live theme / font-size changes without reloading the document.
+        // Apply live app color-scheme / font-size changes without reloading the document.
         if context.coordinator.didFinishLoad {
             let apply = """
-            document.documentElement.setAttribute('data-theme', '\(theme.cssAttribute)');
+            document.documentElement.setAttribute('data-theme', '\(palette.cssAttribute)');
             document.documentElement.style.setProperty('--reader-fs-scale', '\(fontScale)');
             """
             webView.evaluateJavaScript(apply)
@@ -242,7 +209,7 @@ struct WebView: UIViewRepresentable {
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             webView.evaluateJavaScript(Self.reconstructScript(
-                theme: parent.theme.cssAttribute,
+                theme: parent.palette.cssAttribute,
                 fontScale: parent.fontScale
             )) { [weak self] _, _ in
                 self?.didFinishLoad = true
@@ -410,10 +377,6 @@ extension WebView.Coordinator {
           html[data-theme="light"] {
             --bg:#ffffff; --fg:#1c1c1e; --muted:#6b7177;
             --accent:#0a6cff; --rule:rgba(0,0,0,0.10); --card:rgba(0,0,0,0.035);
-          }
-          html[data-theme="sepia"] {
-            --bg:#f6ecd9; --fg:#43331f; --muted:#7c6a4e;
-            --accent:#a8662a; --rule:rgba(67,51,31,0.16); --card:rgba(67,51,31,0.055);
           }
           html[data-theme="dark"] {
             --bg:#0f1115; --fg:#e6e8ea; --muted:#9aa1a8;
