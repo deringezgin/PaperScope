@@ -99,7 +99,7 @@ struct ReaderView: View {
             }
         }
         .fullScreenCover(item: $zoomedImageURL) { url in
-            ZoomableImageView(url: url)
+            ImagePreviewView(url: url)
         }
     }
 
@@ -262,20 +262,22 @@ struct WebView: UIViewRepresentable {
     }
 }
 
-// MARK: - Zoomable Image Viewer (native)
+// MARK: - Image Viewer (native)
 
-struct ZoomableImageView: View {
+struct ImagePreviewView: View {
     let url: URL
     @Environment(\.dismiss) private var dismiss
 
     @State private var scale: CGFloat = 1
-    @State private var lastScale: CGFloat = 1
+    @State private var settledScale: CGFloat = 1
     @State private var offset: CGSize = .zero
-    @State private var lastOffset: CGSize = .zero
+    @State private var settledOffset: CGSize = .zero
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            Color.black.ignoresSafeArea()
+            Color.black
+                .opacity(Double(1 - dismissProgress))
+                .ignoresSafeArea()
 
             AsyncImage(url: url) { phase in
                 switch phase {
@@ -285,9 +287,6 @@ struct ZoomableImageView: View {
                         .scaledToFit()
                         .scaleEffect(scale)
                         .offset(offset)
-                        .gesture(magnification)
-                        .simultaneousGesture(drag)
-                        .onTapGesture(count: 2) { toggleZoom() }
                 case .failure:
                     Image(systemName: "photo.badge.exclamationmark")
                         .font(.largeTitle)
@@ -299,6 +298,12 @@ struct ZoomableImageView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())
+            .gesture(magnification)
+            .simultaneousGesture(drag)
+            .onTapGesture(count: 2) {
+                toggleZoom()
+            }
 
             Button {
                 dismiss()
@@ -314,45 +319,80 @@ struct ZoomableImageView: View {
         .statusBarHidden()
     }
 
+    private var dismissProgress: CGFloat {
+        guard scale <= 1.01 else { return 0 }
+        return min(abs(offset.height) / 360, 0.45)
+    }
+
     private var magnification: some Gesture {
-        MagnificationGesture()
+        MagnificationGesture(minimumScaleDelta: 0.01)
             .onChanged { value in
-                scale = min(max(lastScale * value, 1), 6)
+                scale = clampedScale(settledScale * value)
             }
             .onEnded { _ in
-                lastScale = scale
-                if scale <= 1 { resetTransform() }
+                settledScale = scale
+                if scale <= 1.01 {
+                    resetTransform()
+                }
             }
     }
 
     private var drag: some Gesture {
-        DragGesture()
+        DragGesture(minimumDistance: 8)
             .onChanged { value in
-                guard scale > 1 else { return }
-                offset = CGSize(
-                    width: lastOffset.width + value.translation.width,
-                    height: lastOffset.height + value.translation.height
-                )
+                if scale > 1.01 {
+                    offset = CGSize(
+                        width: settledOffset.width + value.translation.width,
+                        height: settledOffset.height + value.translation.height
+                    )
+                } else {
+                    offset = CGSize(
+                        width: value.translation.width * 0.12,
+                        height: value.translation.height
+                    )
+                }
             }
-            .onEnded { _ in lastOffset = offset }
+            .onEnded { value in
+                if scale > 1.01 {
+                    settledOffset = offset
+                } else if shouldDismiss(for: value) {
+                    dismiss()
+                } else {
+                    withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) {
+                        resetTransform()
+                    }
+                }
+            }
     }
 
     private func toggleZoom() {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-            if scale > 1 {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.82)) {
+            if scale > 1.01 {
                 resetTransform()
             } else {
-                scale = 2.5
-                lastScale = 2.5
+                scale = 2.25
+                settledScale = 2.25
+                offset = .zero
+                settledOffset = .zero
             }
         }
     }
 
+    private func shouldDismiss(for value: DragGesture.Value) -> Bool {
+        let vertical = value.predictedEndTranslation.height
+        let horizontal = value.predictedEndTranslation.width
+        return abs(vertical) > 120 && abs(vertical) > abs(horizontal) * 1.2
+    }
+
+    private func clampedScale(_ value: CGFloat) -> CGFloat {
+        min(max(value, 1), 4)
+    }
+
     private func resetTransform() {
         scale = 1
-        lastScale = 1
+        settledScale = 1
         offset = .zero
-        lastOffset = .zero
+        settledOffset = .zero
     }
 }
 
@@ -434,7 +474,7 @@ extension WebView.Coordinator {
             overflow-x: auto; -webkit-overflow-scrolling: touch;
           }
           .reconstructed img {
-            display: inline-block; border-radius: 6px; cursor: zoom-in;
+            display: inline-block; border-radius: 6px; cursor: pointer;
           }
           .ltx_caption, figcaption {
             font-size: 0.84em; color: var(--muted);
@@ -604,7 +644,7 @@ extension WebView.Coordinator {
           container.querySelectorAll('.ltx_table > .ltx_transformed_outer, .ltx_table > .ltx_inline-block').forEach(addTableTarget);
           tableTargets.forEach(function(el) { wrap(el, 'table-scroll'); });
 
-          // ---- 5. Native image zoom: forward taps to Swift ----
+          // ---- 5. Native image preview: forward taps to Swift ----
           container.querySelectorAll('img').forEach(function(img) {
             img.addEventListener('click', function(e) {
               e.preventDefault();

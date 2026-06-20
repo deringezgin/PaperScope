@@ -126,7 +126,7 @@ struct SearchView: View {
 
             if showFilters {
                 filterPanel
-                    .transition(.opacity.combined(with: .move(edge: .top)))
+                    .transition(.searchFilterReveal)
             }
         }
     }
@@ -318,6 +318,34 @@ struct SearchView: View {
 
 private enum SearchScrollTarget {
     static let header = "search-header"
+}
+
+private struct SearchFilterRevealModifier: ViewModifier {
+    var progress: CGFloat
+
+    var animatableData: CGFloat {
+        get { progress }
+        set { progress = newValue }
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .mask(
+                Rectangle()
+                    .scaleEffect(x: 1, y: max(progress, 0.01), anchor: .top)
+            )
+            .opacity(Double(progress))
+            .offset(y: -8 * (1 - progress))
+    }
+}
+
+private extension AnyTransition {
+    static var searchFilterReveal: AnyTransition {
+        .modifier(
+            active: SearchFilterRevealModifier(progress: 0),
+            identity: SearchFilterRevealModifier(progress: 1)
+        )
+    }
 }
 
 struct FilterChip: View {
