@@ -1,6 +1,6 @@
 import Foundation
 
-struct Paper: Identifiable, Hashable {
+struct Paper: Identifiable, Hashable, Codable {
     let id: String // ArXiv ID
     let title: String
     let authors: [String]

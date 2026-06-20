@@ -5,6 +5,7 @@ import UIKit
 struct PaperScopeApp: App {
     @StateObject private var appSettings = AppSettings()
     @StateObject private var navState = NavigationState()
+    @StateObject private var foldersStore = PaperFoldersStore()
     
     init() {
         let appearance = UINavigationBarAppearance()
@@ -23,6 +24,7 @@ struct PaperScopeApp: App {
             RootTabView()
                 .environmentObject(appSettings)
                 .environmentObject(navState)
+                .environmentObject(foldersStore)
                 .preferredColorScheme(appSettings.isDarkMode ? .dark : .light)
         }
     }

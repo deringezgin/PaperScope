@@ -25,6 +25,10 @@ struct RootTabView: View {
             Tab("Search", systemImage: "magnifyingglass", value: 1) {
                 SearchView()
             }
+
+            Tab("Folders", systemImage: "folder", value: 2) {
+                FoldersView()
+            }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
     }
@@ -34,4 +38,5 @@ struct RootTabView: View {
     RootTabView()
         .environmentObject(AppSettings())
         .environmentObject(NavigationState())
+        .environmentObject(PaperFoldersStore(storageKey: "PaperScope.previewFolders"))
 }

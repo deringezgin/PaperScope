@@ -4,6 +4,7 @@ struct PaperDetailView: View {
     let paper: Paper
     @EnvironmentObject var navState: NavigationState
     @State private var htmlAvailability: HtmlAvailability = .checking
+    @State private var showingFolderPicker = false
     
     private var candidateHtmlUrl: URL? {
         guard
@@ -107,6 +108,20 @@ struct PaperDetailView: View {
             AnimatedBackgroundView()
         }
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showingFolderPicker = true
+                } label: {
+                    Image(systemName: "folder.badge.plus")
+                }
+                .accessibilityLabel("Add to Folders")
+            }
+        }
+        .sheet(isPresented: $showingFolderPicker) {
+            PaperFolderPickerView(paper: paper)
+                .presentationDetents([.medium, .large])
+        }
         .task(id: paper.id) {
             await verifyHtmlAvailability()
         }
@@ -167,6 +182,7 @@ private enum HtmlAvailability {
     NavigationView {
         PaperDetailView(paper: MockData.papers[0])
             .environmentObject(NavigationState())
+            .environmentObject(PaperFoldersStore(storageKey: "PaperScope.previewFolders"))
     }
 }
 
