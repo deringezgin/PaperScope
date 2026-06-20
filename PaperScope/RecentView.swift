@@ -43,8 +43,7 @@ struct RecentView: View {
                     .presentationDragIndicator(.visible)
             }
             .background {
-                LinearGradient(colors: [.blue.opacity(0.1), .purple.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                    .ignoresSafeArea()
+                AnimatedBackgroundView()
             }
             .navigationDestination(for: Paper.self) { paper in
                 PaperDetailView(paper: paper)

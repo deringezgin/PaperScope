@@ -46,8 +46,7 @@ struct SettingsView: View {
                 }
             }
             .background {
-                 LinearGradient(colors: [.blue.opacity(0.1), .purple.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                     .ignoresSafeArea()
+                AnimatedBackgroundView()
             }
             .navigationTitle("Settings")
             .toolbar {
@@ -72,8 +71,7 @@ struct SettingsView: View {
 
 #Preview {
     ZStack {
-        LinearGradient(colors: [.blue.opacity(0.3), .purple.opacity(0.3)], startPoint: .top, endPoint: .bottom)
-            .ignoresSafeArea()
+        AnimatedBackgroundView()
         SettingsView()
             .environmentObject(AppSettings())
     }

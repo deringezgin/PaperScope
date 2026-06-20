@@ -71,8 +71,7 @@ struct CategorySelectionView: View {
             .padding()
         }
         .background {
-            LinearGradient(colors: [.blue.opacity(0.1), .purple.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                .ignoresSafeArea()
+            AnimatedBackgroundView()
         }
         .navigationTitle("Home Feed Categories")
         .toolbar(.hidden, for: .tabBar)
